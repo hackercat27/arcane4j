@@ -2,6 +2,7 @@ package ca.hackercat.arcane.engine;
 
 import ca.hackercat.arcane.engine.asset.ACAssetManager;
 import ca.hackercat.arcane.engine.asset.ACMeshFactory;
+import ca.hackercat.arcane.engine.asset.ACShaderFactory;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -12,7 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11C.glClearColor;
+import static org.lwjgl.opengl.GL30.*;
 
 public class ACWindowManager {
 
@@ -69,16 +70,19 @@ public class ACWindowManager {
 
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
+            glViewport(0, 0, 854, 480);
             glClearColor(0f, 0f, 0f, 0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             renderer.drawRect(new Vector2d(0, 0), new Vector2d(1, 1));
 
             ACMeshFactory.createMeshes();
+            ACShaderFactory.createShaders();
             handleDrawQueue();
 
-            ACAssetManager.clean();
-
             glfwSwapBuffers(window);
+
+            ACAssetManager.clean();
         }
 
         GL.destroy();

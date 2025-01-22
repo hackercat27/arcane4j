@@ -1,7 +1,10 @@
 package ca.hackercat.arcane.engine.io;
 
+import ca.hackercat.arcane.logging.ACLogger;
 import com.google.gson.Gson;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -9,11 +12,7 @@ public class ACFileUtils {
 
     public enum Directive {
         FILE("file:", ""),
-        RESOURCE("res:", "assets"),
-        SHADERS("shader:", "res:/shaders"),
-        TEXTURE("tex:", "res:/textures"),
-        SOUND("sound:", "res:/sounds"),
-        LEVEL("lvl:", "res:/levels");
+        RESOURCE("res:", "assets");
 
         public final String value;
         public final String expansion;
@@ -92,13 +91,43 @@ public class ACFileUtils {
         return path;
     }
 
-    public static String readAll(InputStream in) {
+    public static String readStringFromStream(InputStream in) {
+        if (in == null) {
+            return "";
+        }
         try {
             return new String(in.readAllBytes());
         }
         catch (IOException e) {
             return "";
         }
+    }
+
+    public static String readStringFromPath(String path) {
+        return readStringFromStream(getInputStream(path));
+    }
+
+    public static InputStream getInputStream(String path) {
+        /* try to find asset file first,
+         * and if it doesn't exist, then try to find a file on disk.
+         * jar resources can mask files since they take priority, but whatever.
+         */
+
+        String simplePath = simplifyPath(path);
+
+        InputStream in = ACFileUtils.class.getResourceAsStream("/"+simplePath);
+        if (in == null) {
+            try {
+                in = new FileInputStream(simplePath);
+            }
+            catch (FileNotFoundException ignored) {}
+        }
+
+        // if the inputstream is STILL null, then that means we didn't find anything.
+        if (in == null) {
+            ACLogger.warn("Couldn't find file '" + simplePath + "'");
+        }
+        return in;
     }
 
     public static <T> T fromJson(String json, Class<T> clazz) {

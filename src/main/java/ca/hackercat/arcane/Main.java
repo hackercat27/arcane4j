@@ -8,6 +8,6 @@ public class Main {
         ACWindowManager m = new ACWindowManager();
         int ret = m.startWindow();
 
-        System.out.println("Exited with exit code " + ret);
+        System.out.println("Main thread finished with exit code " + ret);
     }
 }

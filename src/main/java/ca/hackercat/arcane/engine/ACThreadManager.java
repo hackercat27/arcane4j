@@ -9,10 +9,15 @@ public class ACThreadManager {
     private static class ACThread {
         Thread thread;
         int id;
+        boolean started;
 
         public ACThread(Thread thread, int id) {
             this.thread = thread;
             this.id = id;
+        }
+
+        public boolean halted() {
+            return started && !thread.isAlive();
         }
     }
 
@@ -22,8 +27,10 @@ public class ACThreadManager {
     public static Thread execute(Runnable runnable) {
         int id = gid++;
         Thread t = new Thread(runnable, String.format("arcane-worker%d", id));
-        threads.add(new ACThread(t, id));
+        ACThread threadStruct = new ACThread(t, id);
+        threads.add(threadStruct);
         t.start();
+        threadStruct.started = true;
         return t;
     }
 

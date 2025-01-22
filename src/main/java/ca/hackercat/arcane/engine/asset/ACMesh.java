@@ -1,13 +1,20 @@
 package ca.hackercat.arcane.engine.asset;
 
 import ca.hackercat.arcane.engine.ACThreadManager;
-import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 
 import static org.lwjgl.opengl.GL30.*;
 
 public class ACMesh implements ACAsset {
+
+    private static ACShader shader;
+
+    static {
+        ACThreadManager.execute(() -> shader = ACShaderFactory.get("generic",
+                "res:/shaders/core/generic.vsh",
+                "res:/shaders/core/generic.fsh"));
+    }
 
     public Vector3d[] vertices;
     public Vector2d[] uvs;
@@ -33,27 +40,28 @@ public class ACMesh implements ACAsset {
     }
 
     public void render() {
-        if (!registered) {
-            ACLogger.error("%o is not initialized!", this);
+        if (!registered || shader == null || !shader.registered) {
+            // silently fail instead of spamming log
             return;
         }
+
         ACThreadManager.throwIfNotMainThread();
 
         glBindVertexArray(vao);
 
         glEnableVertexAttribArray(0); // position
-        glEnableVertexAttribArray(1); // UVs
-        glEnableVertexAttribArray(2); // normals
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
+        glUseProgram(shader.programID);
+
         glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(2);
-
         glBindVertexArray(0);
+
+        glUseProgram(0);
     }
 
     @Override

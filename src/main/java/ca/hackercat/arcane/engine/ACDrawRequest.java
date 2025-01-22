@@ -37,8 +37,8 @@ public class ACDrawRequest {
     }
 
     public void render() {
-
-
-
+        if (quad != null) {
+            quad.render();
+        }
     }
 }
