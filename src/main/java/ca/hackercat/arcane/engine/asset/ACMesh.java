@@ -1,6 +1,7 @@
 package ca.hackercat.arcane.engine.asset;
 
 import ca.hackercat.arcane.engine.ACThreadManager;
+import ca.hackercat.arcane.engine.io.ACFileUtils;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 
@@ -11,9 +12,7 @@ public class ACMesh implements ACAsset {
     private static ACShader shader;
 
     static {
-        ACThreadManager.execute(() -> shader = ACShaderFactory.get("generic",
-                "res:/shaders/core/generic.vsh",
-                "res:/shaders/core/generic.fsh"));
+        shader = (ACShader) ACFileUtils.getAsset("shader.generic");
     }
 
     public Vector3d[] vertices;

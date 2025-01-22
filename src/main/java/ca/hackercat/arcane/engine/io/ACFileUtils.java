@@ -1,5 +1,6 @@
 package ca.hackercat.arcane.engine.io;
 
+import ca.hackercat.arcane.engine.asset.ACAsset;
 import ca.hackercat.arcane.logging.ACLogger;
 import com.google.gson.Gson;
 
@@ -21,23 +22,49 @@ public class ACFileUtils {
             this.value = value;
             this.expansion = expansion;
         }
+
+        public static Directive getFromValue(String value) {
+            for (Directive d : Directive.values()) {
+                if (value.equals(d.value)) {
+                    return d;
+                }
+            }
+            return null;
+        }
     }
 
     public enum FileType {
         TEXTURE("texture"),
+        SHADER("shader"),
         SOUND("sound"),
-        DICT("dict"),
-        DICT_JSON("jdict"),
-        DICT_PLIST("pdict");
+        INDEX("index"),
+        DICT("dict"), // properties file
+        DICT_JSON("jdict"), // json file
+        DICT_PLIST("pdict"); // plist file (xml)
 
         public final String value;
 
         FileType(String value) {
             this.value = value;
         }
+
+        public static FileType getFromValue(String value) {
+            for (FileType ft : FileType.values()) {
+                if (value.equals(ft.value)) {
+                    return ft;
+                }
+            }
+            return null;
+        }
     }
 
     public static String ASSET_INDEX_PATH = "res:/index.json";
+
+    private static ACAssetIndex assetIndex;
+
+    static {
+        assetIndex = fromJson(readStringFromPath(ASSET_INDEX_PATH), ACAssetIndex.class);
+    }
 
     public static String simplifyPath(String path) {
 
@@ -87,7 +114,8 @@ public class ACFileUtils {
             return simplifyPath(pathBuilder.toString());
         }
 
-        // else, path is perfect and doesn't need changing - return as is
+        // else, path is perfect and doesn't need changing
+        // return as is
         return path;
     }
 
@@ -108,7 +136,8 @@ public class ACFileUtils {
     }
 
     public static InputStream getInputStream(String path) {
-        /* try to find asset file first,
+        /*
+         * try to find classpath file first,
          * and if it doesn't exist, then try to find a file on disk.
          * jar resources can mask files since they take priority, but whatever.
          */
@@ -129,6 +158,11 @@ public class ACFileUtils {
         }
         return in;
     }
+
+    public static ACAsset getAsset(String name) {
+        return assetIndex.getAsset(name);
+    }
+
 
     public static <T> T fromJson(String json, Class<T> clazz) {
         return new Gson().fromJson(json, clazz);

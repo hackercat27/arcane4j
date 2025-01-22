@@ -1,0 +1,10 @@
+{
+  "elements": [
+    {
+      "type": "shader",
+      "name": "shader.generic",
+      "fragment": "res:/shaders/core/generic.fsh",
+      "vertex": "res:/shaders/core/generic.vsh"
+    }
+  ]
+}

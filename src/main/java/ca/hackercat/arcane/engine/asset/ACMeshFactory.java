@@ -80,6 +80,7 @@ public class ACMeshFactory {
         int bufferID = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, bufferID);
         glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+        // let it be known that this bitch right here caused me 2 hours of pain
         glVertexAttribPointer(index, size, GL_DOUBLE, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         return bufferID;

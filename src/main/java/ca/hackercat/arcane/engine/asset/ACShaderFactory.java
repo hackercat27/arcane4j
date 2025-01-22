@@ -43,7 +43,8 @@ public class ACShaderFactory {
 
                 createShader(shader);
 
-                ACLogger.log("Instantiated shader (" + shader.name + ") with program id " + shader.programID);
+                ACLogger.log("Instantiated shader %s with program id %d", shader
+                        .name, shader.programID);
                 shader.registered = true;
                 handledShaders.add(shader);
                 synchronized (shader) {
