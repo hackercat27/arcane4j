@@ -53,7 +53,7 @@ public class ACThreadManager {
 
     public static void throwIfMainThread() {
         if (isMainThread()) {
-            throw new RuntimeException(new IllegalCallerException("Cannot run on main thread."));
+            throw new RuntimeException(new IllegalCallerException("Not allowed to run on main thread."));
         }
     }
 

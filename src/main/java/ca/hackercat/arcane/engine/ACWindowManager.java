@@ -3,9 +3,10 @@ package ca.hackercat.arcane.engine;
 import ca.hackercat.arcane.engine.asset.ACAssetManager;
 import ca.hackercat.arcane.engine.asset.ACMeshFactory;
 import ca.hackercat.arcane.engine.asset.ACShaderFactory;
+import ca.hackercat.arcane.engine.io.ACWindow;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
-import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
@@ -17,25 +18,20 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ACWindowManager {
 
-    private long window;
+    private long windowPtr;
 
     private final List<ACDrawRequest> queue;
+
 
     public ACWindowManager() {
         // the ultimate question of linked list or array list...?
         queue = new LinkedList<>();
     }
 
-    private void handleDrawQueue() {
-        ACThreadManager.throwIfNotMainThread();
-        synchronized (queue) {
-            for (ACDrawRequest request : queue) {
-                request.render();
-            }
-        }
-    }
-
     public int startWindow() {
+
+        int initialWidth = 854;
+        int initialHeight = 480;
 
         GLFWErrorCallback.createPrint(ACLogger.err).set();
 
@@ -53,42 +49,47 @@ public class ACWindowManager {
 
         ACLogger.log("Initialized GLFW");
 
-        window = glfwCreateWindow(854, 480, "Arcane", 0, 0);
+        windowPtr = glfwCreateWindow(initialWidth, initialHeight, "Arcane", 0, 0);
 
-        if (window == 0) {
+        if (windowPtr == 0) {
             ACLogger.error("Failed to create window!");
             return -1;
         }
 
-        glfwMakeContextCurrent(window);
+        ACWindow windowObj = new ACWindow(windowPtr, initialWidth, initialHeight);
+
+        glfwMakeContextCurrent(windowPtr);
         glfwSwapInterval(1);
-        glfwShowWindow(window);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwShowWindow(windowPtr);
 
         GLCapabilities capabilities = GL.createCapabilities();
 
-        ACRenderer renderer = new ACRenderer(queue);
+        ACRenderer renderer = new ACRenderer(queue, windowObj);
 
-        while (!glfwWindowShouldClose(window)) {
+        while (!glfwWindowShouldClose(windowPtr)) {
             glfwPollEvents();
-            glViewport(0, 0, 854, 480);
-            glClearColor(0f, 0f, 0f, 0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0f, 0f, 0f, 1f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glViewport(0, 0, windowObj.getWidth(), windowObj.getHeight());
 
             renderer.drawRect(new Vector2d(0, 0), new Vector2d(1, 1));
 
             ACMeshFactory.createMeshes();
             ACShaderFactory.createShaders();
-            handleDrawQueue();
+            renderer.handleDrawQueue();
 
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(windowPtr);
 
             ACAssetManager.clean();
         }
 
+        ACAssetManager.forceDisposeAll();
+
         GL.destroy();
 
         glfwMakeContextCurrent(0);
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(windowPtr);
         glfwTerminate();
 
         return 0;

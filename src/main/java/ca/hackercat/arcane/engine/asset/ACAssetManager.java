@@ -7,9 +7,9 @@ import java.util.List;
 
 public class ACAssetManager {
 
-    private static final List<ACAsset> assets = new ArrayList<>();
+    private static final List<ACDisposable> assets = new ArrayList<>();
 
-    public static void register(ACAsset asset) {
+    public static void register(ACDisposable asset) {
         if (asset == null) {
             return;
         }
@@ -20,9 +20,9 @@ public class ACAssetManager {
 
     public static void clean() {
         ACThreadManager.throwIfNotMainThread();
-        List<ACAsset> garbage = new ArrayList<>();
+        List<ACDisposable> garbage = new ArrayList<>();
         synchronized (assets) {
-            for (ACAsset asset : assets) {
+            for (ACDisposable asset : assets) {
                 if (asset.isDisposable()) {
                     garbage.add(asset);
                     asset.dispose();
@@ -35,7 +35,7 @@ public class ACAssetManager {
     public static void forceDisposeAll() {
         ACThreadManager.throwIfNotMainThread();
         synchronized (assets) {
-            for (ACAsset asset : assets) {
+            for (ACDisposable asset : assets) {
                 asset.dispose();
             }
             assets.clear();

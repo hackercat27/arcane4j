@@ -1,6 +1,17 @@
 package ca.hackercat.arcane.engine.asset;
 
-public class ACShader implements ACAsset {
+import org.joml.Matrix4d;
+import org.joml.Matrix4f;
+import org.joml.Vector2d;
+import org.joml.Vector3d;
+import org.joml.Vector4d;
+import org.lwjgl.system.MemoryUtil;
+
+import java.nio.FloatBuffer;
+
+import static org.lwjgl.opengl.GL20.*;
+
+public class ACShader implements ACDisposable {
 
     private static class Uniform {
         public String name;
@@ -23,6 +34,41 @@ public class ACShader implements ACAsset {
         this.fragmentPath = fragmentPath;
     }
 
+    public int getUniformLocation(String uniformName) {
+        return glGetUniformLocation(programID, uniformName);
+    }
+
+    public void setUniform(String name, boolean value) {
+        glUniform1i(getUniformLocation(name), value? 1 : 0);
+    }
+
+    public void setUniform(String name, int value) {
+        glUniform1i(getUniformLocation(name), value);
+    }
+
+    public void setUniform(String name, double value) {
+        setUniform(name, (float) value);
+    }
+
+    public void setUniform(String name, Vector2d value) {
+        glUniform2f(getUniformLocation(name), (float) value.x(), (float) value.y());
+    }
+
+    public void setUniform(String name, Vector3d value) {
+        glUniform3f(getUniformLocation(name), (float) value.x(), (float) value.y(), (float) value.z());
+    }
+
+    public void setUniform(String name, Vector4d value) {
+        glUniform4f(getUniformLocation(name), (float) value.x(), (float) value.y(), (float) value.z(), (float) value.w());
+    }
+
+    public void setUniform(String name, Matrix4d value) {
+        FloatBuffer buf = MemoryUtil.memAllocFloat(16);
+        new Matrix4f(value).get(buf);
+        glUniformMatrix4fv(getUniformLocation(name), false, buf);
+        MemoryUtil.memFree(buf);
+    }
+
     @Override
     public boolean isDisposable() {
         return disposable;
@@ -30,6 +76,9 @@ public class ACShader implements ACAsset {
 
     @Override
     public void dispose() {
-
+        glDeleteShader(vertexID);
+        glDeleteShader(fragmentID);
+        glDeleteProgram(programID);
+        registered = false;
     }
 }

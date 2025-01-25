@@ -1,19 +1,11 @@
 package ca.hackercat.arcane.engine.asset;
 
-import ca.hackercat.arcane.engine.ACThreadManager;
-import ca.hackercat.arcane.engine.io.ACFileUtils;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 
 import static org.lwjgl.opengl.GL30.*;
 
-public class ACMesh implements ACAsset {
-
-    private static ACShader shader;
-
-    static {
-        shader = (ACShader) ACFileUtils.getAsset("shader.generic");
-    }
+public class ACMesh implements ACDisposable {
 
     public Vector3d[] vertices;
     public Vector2d[] uvs;
@@ -36,31 +28,6 @@ public class ACMesh implements ACAsset {
         this.indices = indices;
 
         ACAssetManager.register(this);
-    }
-
-    public void render() {
-        if (!registered || shader == null || !shader.registered) {
-            // silently fail instead of spamming log
-            return;
-        }
-
-        ACThreadManager.throwIfNotMainThread();
-
-        glBindVertexArray(vao);
-
-        glEnableVertexAttribArray(0); // position
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-
-        glUseProgram(shader.programID);
-
-        glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glDisableVertexAttribArray(0);
-        glBindVertexArray(0);
-
-        glUseProgram(0);
     }
 
     @Override

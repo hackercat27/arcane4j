@@ -2,7 +2,7 @@
   "elements": [
     {
       "type": "shader",
-      "name": "shader.generic",
+      "name": "arcane.shader.generic",
       "fragment": "res:/shaders/core/generic.fsh",
       "vertex": "res:/shaders/core/generic.vsh"
     }

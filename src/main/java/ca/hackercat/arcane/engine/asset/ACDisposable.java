@@ -1,6 +1,6 @@
 package ca.hackercat.arcane.engine.asset;
 
-public interface ACAsset {
+public interface ACDisposable {
     boolean isDisposable();
     void dispose();
 }

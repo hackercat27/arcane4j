@@ -1,13 +1,13 @@
 package ca.hackercat.arcane.engine.io;
 
 import ca.hackercat.arcane.engine.ACThreadManager;
-import ca.hackercat.arcane.engine.asset.ACAsset;
+import ca.hackercat.arcane.engine.asset.ACDisposable;
 import ca.hackercat.arcane.engine.asset.ACAssetManager;
 import org.lwjgl.glfw.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class ACWindow implements ACAsset {
+public class ACWindow implements ACDisposable {
 
     private long window;
     private int width;
@@ -21,9 +21,11 @@ public class ACWindow implements ACAsset {
         }
     };
 
-    public ACWindow(long window) {
+    public ACWindow(long window, int width, int height) {
         ACThreadManager.throwIfNotMainThread();
         this.window = window;
+        this.width = width;
+        this.height = height;
         glfwSetWindowSizeCallback(window, sizeCallback);
         ACAssetManager.register(this);
     }

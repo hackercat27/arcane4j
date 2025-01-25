@@ -17,6 +17,8 @@ public class ACShaderFactory {
     private static final List<ACShader> shaders = new LinkedList<>();
 
     public static ACShader get(String name, String vertexPath, String fragmentPath) {
+        ACThreadManager.throwIfMainThread();
+
         ACShader shader = new ACShader(name, vertexPath, fragmentPath);
         shaders.add(shader);
 

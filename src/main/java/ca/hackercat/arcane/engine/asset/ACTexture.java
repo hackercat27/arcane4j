@@ -1,6 +1,6 @@
 package ca.hackercat.arcane.engine.asset;
 
-public class ACTexture implements ACAsset {
+public class ACTexture implements ACDisposable {
 
 
 
