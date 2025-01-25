@@ -32,4 +32,14 @@ public class ACAssetManager {
         }
     }
 
+    public static void forceDisposeAll() {
+        ACThreadManager.throwIfNotMainThread();
+        synchronized (assets) {
+            for (ACAsset asset : assets) {
+                asset.dispose();
+            }
+            assets.clear();
+        }
+    }
+
 }
