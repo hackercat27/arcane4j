@@ -47,7 +47,7 @@ public class ACShader implements ACDisposable {
     }
 
     public void setUniform(String name, double value) {
-        setUniform(name, (float) value);
+        glUniform1f(getUniformLocation(name), (float) value);
     }
 
     public void setUniform(String name, Vector2d value) {
