@@ -47,6 +47,12 @@ public class ACThreadManager {
 
     public static void throwIfNotMainThread() {
         if (!isMainThread()) {
+            throw new RuntimeException(new IllegalCallerException("Cannot run on non-main thread."));
+        }
+    }
+
+    public static void throwIfMainThread() {
+        if (isMainThread()) {
             throw new RuntimeException(new IllegalCallerException("Cannot run on main thread."));
         }
     }
