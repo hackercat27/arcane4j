@@ -1,8 +1,8 @@
-package ca.hackercat.arcane.engine.io;
+package ca.hackercat.arcane.core.io;
 
-import ca.hackercat.arcane.engine.asset.ACDisposable;
-import ca.hackercat.arcane.engine.asset.ACShaderFactory;
-import ca.hackercat.arcane.engine.io.ACFileUtils.FileType;
+import ca.hackercat.arcane.core.asset.ACDisposable;
+import ca.hackercat.arcane.core.asset.ACShaderFactory;
+import ca.hackercat.arcane.core.io.ACFileUtils.FileType;
 import ca.hackercat.arcane.logging.ACLogger;
 
 import java.io.FileNotFoundException;

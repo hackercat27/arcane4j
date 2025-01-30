@@ -1,6 +1,6 @@
 package ca.hackercat.arcane;
 
-import ca.hackercat.arcane.engine.ACWindowManager;
+import ca.hackercat.arcane.core.ACWindowManager;
 
 public class Main {
     public static void main(String[] args) {

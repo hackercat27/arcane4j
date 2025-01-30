@@ -1,6 +1,6 @@
-package ca.hackercat.arcane.engine.asset;
+package ca.hackercat.arcane.core.asset;
 
-import ca.hackercat.arcane.engine.ACThreadManager;
+import ca.hackercat.arcane.core.ACThreadManager;
 
 import java.util.ArrayList;
 import java.util.List;

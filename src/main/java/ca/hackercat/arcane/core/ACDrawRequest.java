@@ -1,4 +1,4 @@
-package ca.hackercat.arcane.engine;
+package ca.hackercat.arcane.core;
 
 import org.joml.Vector2d;
 import org.joml.Vector4d;

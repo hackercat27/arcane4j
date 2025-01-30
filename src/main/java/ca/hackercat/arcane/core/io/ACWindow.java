@@ -1,8 +1,8 @@
-package ca.hackercat.arcane.engine.io;
+package ca.hackercat.arcane.core.io;
 
-import ca.hackercat.arcane.engine.ACThreadManager;
-import ca.hackercat.arcane.engine.asset.ACDisposable;
-import ca.hackercat.arcane.engine.asset.ACAssetManager;
+import ca.hackercat.arcane.core.ACThreadManager;
+import ca.hackercat.arcane.core.asset.ACDisposable;
+import ca.hackercat.arcane.core.asset.ACAssetManager;
 import org.lwjgl.glfw.*;
 
 import static org.lwjgl.glfw.GLFW.*;

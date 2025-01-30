@@ -1,6 +1,6 @@
 package ca.hackercat.arcane.entity.component;
 
-import ca.hackercat.arcane.engine.ACRenderer;
+import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.entity.ACCollisionBody;
 import ca.hackercat.arcane.entity.ACEntity;
 

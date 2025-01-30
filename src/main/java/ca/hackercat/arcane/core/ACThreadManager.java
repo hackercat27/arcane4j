@@ -1,4 +1,4 @@
-package ca.hackercat.arcane.engine;
+package ca.hackercat.arcane.core;
 
 import java.util.ArrayList;
 import java.util.List;

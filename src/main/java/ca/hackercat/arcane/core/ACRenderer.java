@@ -1,11 +1,11 @@
-package ca.hackercat.arcane.engine;
+package ca.hackercat.arcane.core;
 
-import ca.hackercat.arcane.engine.asset.ACMesh;
-import ca.hackercat.arcane.engine.asset.ACMeshFactory;
-import ca.hackercat.arcane.engine.asset.ACShader;
-import ca.hackercat.arcane.engine.asset.ACTexture;
-import ca.hackercat.arcane.engine.io.ACFileUtils;
-import ca.hackercat.arcane.engine.io.ACWindow;
+import ca.hackercat.arcane.core.asset.ACMesh;
+import ca.hackercat.arcane.core.asset.ACMeshFactory;
+import ca.hackercat.arcane.core.asset.ACShader;
+import ca.hackercat.arcane.core.asset.ACTexture;
+import ca.hackercat.arcane.core.io.ACFileUtils;
+import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.entity.ACEntity;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACMath;

@@ -1,4 +1,4 @@
-package ca.hackercat.arcane.engine.asset;
+package ca.hackercat.arcane.core.asset;
 
 import org.joml.Matrix4d;
 import org.joml.Matrix4f;

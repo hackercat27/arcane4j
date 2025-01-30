@@ -1,4 +1,4 @@
-package ca.hackercat.arcane.engine.asset;
+package ca.hackercat.arcane.core.asset;
 
 public interface ACDisposable {
     boolean isDisposable();

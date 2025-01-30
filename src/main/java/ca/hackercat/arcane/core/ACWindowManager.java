@@ -1,10 +1,10 @@
-package ca.hackercat.arcane.engine;
+package ca.hackercat.arcane.core;
 
-import ca.hackercat.arcane.engine.asset.ACAssetManager;
-import ca.hackercat.arcane.engine.asset.ACMeshFactory;
-import ca.hackercat.arcane.engine.asset.ACShaderFactory;
-import ca.hackercat.arcane.engine.io.ACInput;
-import ca.hackercat.arcane.engine.io.ACWindow;
+import ca.hackercat.arcane.core.asset.ACAssetManager;
+import ca.hackercat.arcane.core.asset.ACMeshFactory;
+import ca.hackercat.arcane.core.asset.ACShaderFactory;
+import ca.hackercat.arcane.core.io.ACInput;
+import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.*;

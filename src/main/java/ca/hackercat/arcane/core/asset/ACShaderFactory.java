@@ -1,10 +1,8 @@
-package ca.hackercat.arcane.engine.asset;
+package ca.hackercat.arcane.core.asset;
 
-import ca.hackercat.arcane.engine.ACThreadManager;
-import ca.hackercat.arcane.engine.io.ACFileUtils;
+import ca.hackercat.arcane.core.ACThreadManager;
+import ca.hackercat.arcane.core.io.ACFileUtils;
 import ca.hackercat.arcane.logging.ACLogger;
-import org.joml.Vector2d;
-import org.joml.Vector3d;
 
 import java.util.LinkedList;
 import java.util.List;

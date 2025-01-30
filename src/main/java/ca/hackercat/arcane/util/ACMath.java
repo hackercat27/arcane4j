@@ -1,6 +1,6 @@
 package ca.hackercat.arcane.util;
 
-import ca.hackercat.arcane.engine.io.ACWindow;
+import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.entity.ACEntity;
 import org.joml.Matrix4d;
 import org.joml.Vector2d;
