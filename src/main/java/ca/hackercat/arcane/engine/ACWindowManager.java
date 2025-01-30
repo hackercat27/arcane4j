@@ -3,15 +3,12 @@ package ca.hackercat.arcane.engine;
 import ca.hackercat.arcane.engine.asset.ACAssetManager;
 import ca.hackercat.arcane.engine.asset.ACMeshFactory;
 import ca.hackercat.arcane.engine.asset.ACShaderFactory;
+import ca.hackercat.arcane.engine.io.ACInput;
 import ca.hackercat.arcane.engine.io.ACWindow;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GLCapabilities;
-
-import java.util.LinkedList;
-import java.util.List;
+import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -20,12 +17,9 @@ public class ACWindowManager {
 
     private long windowPtr;
 
-    private final List<ACDrawRequest> queue;
-
 
     public ACWindowManager() {
-        // the ultimate question of linked list or array list...?
-        queue = new LinkedList<>();
+
     }
 
     public int startWindow() {
@@ -65,9 +59,14 @@ public class ACWindowManager {
 
         GLCapabilities capabilities = GL.createCapabilities();
 
-        ACRenderer renderer = new ACRenderer(queue, windowObj);
+        ACRenderer renderer = new ACRenderer(windowObj);
+        ACInput.init(windowPtr);
 
         while (!glfwWindowShouldClose(windowPtr)) {
+
+            // MUST update before polling events
+            ACInput.update();
+
             glfwPollEvents();
             glClearColor(0f, 0f, 0f, 1f);
             glClear(GL_COLOR_BUFFER_BIT);

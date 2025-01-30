@@ -6,7 +6,12 @@ uniform mat4 transform;
 uniform mat4 camera;
 uniform mat4 projection;
 
+uniform vec4 color;
+
+out vec4 out_Color;
+
 void main()
 {
-	gl_Position = projection * camera * transform * vec4(position, 1.0);
+    out_Color = color;
+    gl_Position = projection * camera * transform * vec4(position, 1.0);
 }

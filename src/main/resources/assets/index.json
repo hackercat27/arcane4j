@@ -4,7 +4,24 @@
       "type": "shader",
       "name": "arcane.shader.generic",
       "fragment": "res:/shaders/core/generic.fsh",
-      "vertex": "res:/shaders/core/generic.vsh"
+      "vertex": "res:/shaders/core/generic.vsh",
+      "uniforms": [
+        "mat4,transform,transform",
+        "mat4,camera,camera_transform",
+        "mat4,projection,projection"
+      ]
+    },
+    {
+      "type": "shader",
+      "name": "arcane.shader.colorable",
+      "fragment": "res:/shaders/core/colorable.fsh",
+      "vertex": "res:/shaders/core/colorable.vsh",
+      "uniforms": [
+        "mat4,transform,generic.transform_matrix",
+        "mat4,camera,generic.camera_transform_matrix",
+        "mat4,projection,generic.projection_matrix",
+        "vec4,color,custom.object_color"
+      ]
     }
   ]
 }

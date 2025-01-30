@@ -12,7 +12,11 @@ import ca.hackercat.arcane.util.ACMath;
 import org.joml.Matrix4d;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
+import org.joml.Vector4d;
+import org.joml.primitives.Rectangled;
 
+import java.awt.Color;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -22,16 +26,20 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ACRenderer {
 
-    private final List<ACDrawRequest> drawQueue;
+    private final List<ACDrawRequest> drawQueue = new LinkedList<>();
     private ACWindow window;
     private ACMesh quad;
     private ACEntity camera;
-    private Matrix4d globalTransform = new Matrix4d();
 
-    private ACShader genericShader;
+    private Vector2d scale = new Vector2d(1, 1);
+    private Vector2d translation = new Vector2d();
 
-    public ACRenderer(List<ACDrawRequest> drawQueue, ACWindow window) {
-        this.drawQueue = drawQueue;
+    private ACShader shaderGeneric;
+    private ACShader shaderColorable;
+
+    private Vector4d color = new Vector4d(1, 1, 1, 1);
+
+    public ACRenderer(ACWindow window) {
         this.window = window;
 
         // execute in new thread to not block the thread that just
@@ -40,17 +48,28 @@ public class ACRenderer {
         // also hardcoding this quad isn't that shit but its not very far from it
         // but fuck writing code to load arbitrary meshes when this
         // is probably gonna be the only mesh thats used
-        ACThreadManager.execute(() -> quad = ACMeshFactory.get(new Vector3d[] {
-                new Vector3d(0, 0, 0), new Vector3d(1, 0, 0), new Vector3d(1, 1, 0), new Vector3d(0, 1, 0)
-        }, new Vector2d[] {
-                new Vector2d(0, 0), new Vector2d(1, 0), new Vector2d(1, 1), new Vector2d(0, 1)
-        }, new Vector3d[] {
-                new Vector3d(0, 0, 1), new Vector3d(0, 0, 1), new Vector3d(0, 0, 1), new Vector3d(0, 0, 1)
-        }, new int[] {
-                0, 1, 2, 0, 2, 3
-        }));
-
-        ACThreadManager.execute(() -> genericShader = (ACShader) ACFileUtils.getAsset("arcane.shader.generic"));
+        ACThreadManager.execute(() -> {
+            quad = ACMeshFactory.get(new Vector3d[] { // positions
+                    new Vector3d(0, 0, 0),
+                    new Vector3d(1, 0, 0),
+                    new Vector3d(1, 1, 0),
+                    new Vector3d(0, 1, 0)
+            }, new Vector2d[] { // uvs
+                    new Vector2d(0, 0),
+                    new Vector2d(1, 0),
+                    new Vector2d(1, 1),
+                    new Vector2d(0, 1)
+            }, new Vector3d[] { // normals
+                    new Vector3d(0, 0, 1),
+                    new Vector3d(0, 0, 1),
+                    new Vector3d(0, 0, 1),
+                    new Vector3d(0, 0, 1)
+            }, new int[] { // indices
+                    0, 1, 2, 0, 2, 3
+            });
+            shaderGeneric = (ACShader) ACFileUtils.getAsset("arcane.shader.generic");
+            shaderColorable = (ACShader) ACFileUtils.getAsset("arcane.shader.colorable");
+        });
     }
 
     public void handleDrawQueue() {
@@ -59,24 +78,43 @@ public class ACRenderer {
         synchronized (drawQueue) {
             for (ACDrawRequest request : drawQueue) {
                 switch (request.type) {
-                    case RECT -> handleDrawRect(request.position, request.size, genericShader);
+                    case RECT -> handleDrawRect(request.position, request.size,
+                                                request.color, request.fill,
+                                                shaderColorable);
                 }
             }
         }
 
+    }
 
+    public void setColor(Color color) {
+        this.color = new Vector4d(color.getRed() / 255d,
+                                  color.getGreen() / 255d,
+                                  color.getBlue() / 255d,
+                                  color.getAlpha() / 255d);
+    }
+
+    public Matrix4d getTransform() {
+        return ACMath.getTransform(this.translation, this.scale);
+    }
+
+    public Rectangled getScreenBounds() {
+        double scale = (double) window.getWidth() / window.getHeight();
+        return new Rectangled(0, 0, scale, 1);
     }
 
     public void drawRect(Vector2d position, Vector2d size) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.RECT);
-        request.position = position;
+        // adjust to have origin in top left
+        request.position = position.add(0, -size.y);
         request.size = size;
+        request.color = new Vector4d(this.color);
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
-    private void handleDrawRect(Vector2d position, Vector2d size, ACShader shader) {
+    private void handleDrawRect(Vector2d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
 
         if (quad == null || !quad.registered || shader == null || !shader.registered) {
             // silently fail instead of crashing
@@ -85,8 +123,7 @@ public class ACRenderer {
 
         ACThreadManager.throwIfNotMainThread();
 
-        Matrix4d transform = ACMath.getTransform(position, size)
-                                   .mul(globalTransform);
+        Matrix4d transform = ACMath.getTransform(position, size);
 
         glBindVertexArray(quad.vao);
 
@@ -94,12 +131,13 @@ public class ACRenderer {
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad.indexBuffer);
 
-
-
         glUseProgram(shader.programID);
         shader.setUniform("transform", transform);
-//        shader.setUniform("projection", ACMath.getOrthographicMatrix(camera, window));
-//        shader.setUniform("camera", new Matrix4d());
+        shader.setUniform("projection", ACMath.getOrthographicMatrix(camera, window));
+        shader.setUniform("camera", getTransform());
+
+        shader.setUniform("color", color);
+
 
         glDrawElements(GL_TRIANGLES, quad.indices.length, GL_UNSIGNED_INT, 0);
 

@@ -1,6 +1,7 @@
 package ca.hackercat.arcane.engine;
 
 import org.joml.Vector2d;
+import org.joml.Vector4d;
 
 public class ACDrawRequest {
 
@@ -12,6 +13,8 @@ public class ACDrawRequest {
     public Type type;
     public Vector2d position;
     public Vector2d size;
+    public Vector4d color;
+    public boolean fill;
 
     public ACDrawRequest(Type type) {
         this.type = type;
