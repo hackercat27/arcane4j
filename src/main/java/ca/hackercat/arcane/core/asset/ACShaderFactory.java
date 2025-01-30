@@ -18,7 +18,9 @@ public class ACShaderFactory {
         ACThreadManager.throwIfMainThread();
 
         ACShader shader = new ACShader(name, vertexPath, fragmentPath);
-        shaders.add(shader);
+        synchronized (shaders) {
+            shaders.add(shader);
+        }
 
         synchronized (shader) {
             while (!shader.registered) {

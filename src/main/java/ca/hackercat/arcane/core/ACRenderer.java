@@ -75,23 +75,60 @@ public class ACRenderer {
     public void handleDrawQueue() {
         ACThreadManager.throwIfNotMainThread();
 
+        List<ACDrawRequest> handled = new LinkedList<>();
         synchronized (drawQueue) {
+            // somehow i was never clearing these and never noticed
+            // and i literally just thought the depth buffer was never getting cleared
+            // like how does that even happen
             for (ACDrawRequest request : drawQueue) {
                 switch (request.type) {
                     case RECT -> handleDrawRect(request.position, request.size,
                                                 request.color, request.fill,
                                                 shaderColorable);
                 }
+                handled.add(request);
             }
+            drawQueue.removeAll(handled);
         }
 
     }
 
     public void setColor(Color color) {
-        this.color = new Vector4d(color.getRed() / 255d,
-                                  color.getGreen() / 255d,
-                                  color.getBlue() / 255d,
-                                  color.getAlpha() / 255d);
+        this.color.set(color.getRed() / 255d,
+                       color.getGreen() / 255d,
+                       color.getBlue() / 255d,
+                       color.getAlpha() / 255d);
+    }
+
+    public void setColor(Vector3d color) {
+        this.color.set(color, 1d);
+    }
+
+    public void setColor(Vector4d color) {
+        this.color.set(color);
+    }
+
+    public void setTranslation(Vector2d translation) {
+        this.translation.set(translation);
+    }
+
+    public void translate(Vector2d translation) {
+        this.translation.add(translation);
+    }
+
+    public void setScale(Vector2d scale) {
+        this.scale.set(scale);
+    }
+
+    public void scale(Vector2d scale) {
+        this.scale.mul(scale);
+    }
+
+    public void setTransform(Matrix4d transform) {
+        Vector3d t = transform.getTranslation(new Vector3d());
+        Vector3d s = transform.getScale(new Vector3d());
+        setTranslation(new Vector2d(t.x, t.y));
+        setScale(new Vector2d(s.x, s.y));
     }
 
     public Matrix4d getTransform() {
@@ -99,22 +136,39 @@ public class ACRenderer {
     }
 
     public Rectangled getScreenBounds() {
-        double scale = (double) window.getWidth() / window.getHeight();
-        return new Rectangled(0, 0, scale, 1);
+        double ratio = (double) window.getWidth() / window.getHeight();
+        double scale = 0.5;
+        return new Rectangled(-ratio * scale, -scale, ratio * scale, scale)
+                .translate(translation).scale(1/this.scale.x, 1/this.scale.y);
     }
 
     public void drawRect(Vector2d position, Vector2d size) {
+        drawRect(position, size, 0);
+    }
+
+    public void drawRect(Rectangled rect) {
+        drawRect(rect, 0);
+    }
+
+    public void drawRect(Rectangled rect, double depth) {
+        drawRect(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth);
+    }
+
+    public void drawRect(Vector2d position, Vector2d size, double depth) {
+        drawRect(new Vector3d(position, depth), size);
+    }
+
+    public void drawRect(Vector3d position, Vector2d size) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.RECT);
-        // adjust to have origin in top left
-        request.position = position.add(0, -size.y);
-        request.size = size;
-        request.color = new Vector4d(this.color);
+        request.position = new Vector3d().set(position);
+        request.size = new Vector2d().set(size);
+        request.color = new Vector4d().set(this.color);
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
-    private void handleDrawRect(Vector2d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
+    private void handleDrawRect(Vector3d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
 
         if (quad == null || !quad.registered || shader == null || !shader.registered) {
             // silently fail instead of crashing

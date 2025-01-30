@@ -10,6 +10,8 @@ import org.joml.Vector2d;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
+import java.awt.Color;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -68,11 +70,23 @@ public class ACWindowManager {
             ACInput.update();
 
             glfwPollEvents();
-            glClearColor(0f, 0f, 0f, 1f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glViewport(0, 0, windowObj.getWidth(), windowObj.getHeight());
+//            glClearColor(0f, 0f, 0f, 1f);
+            glClear(GL_DEPTH_BUFFER_BIT);
 
-            renderer.drawRect(new Vector2d(0, 0), new Vector2d(1, 1));
+
+            double z = System.currentTimeMillis() / 1000d;
+
+            double x = Math.cos(z) / 2d + 0.5;
+            double y = Math.sin(z) / 2d + 0.5;
+
+            renderer.setScale(new Vector2d(0.5d, 0.5d));
+
+            renderer.setColor(Color.BLACK);
+            renderer.drawRect(renderer.getScreenBounds(), 2);
+            renderer.setColor(Color.WHITE);
+            renderer.drawRect(new Vector2d(x, y - 0.5), new Vector2d(0.5, 0.5), 1);
+            renderer.setColor(Color.RED);
+            renderer.drawRect(new Vector2d(-1, 0), new Vector2d(1, 1), 1.5);
 
             ACMeshFactory.createMeshes();
             ACShaderFactory.createShaders();

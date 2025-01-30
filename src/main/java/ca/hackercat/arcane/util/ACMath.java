@@ -11,8 +11,6 @@ import org.joml.Vector3d;
  */
 public class ACMath {
 
-
-    public static double DEFAULT_LAYER = -0.5;
     public static double PI = 3.141592653589793;
     public static double TAU = 6.283185307179586;
 
@@ -26,21 +24,29 @@ public class ACMath {
     }
 
     public static Matrix4d getTransform(Vector2d pos, Vector2d scale) {
+        return getTransform(new Vector3d(pos, 0), new Vector3d(scale, 1));
+    }
+
+    public static Matrix4d getTransform(Vector3d pos, Vector2d scale) {
+        return getTransform(pos, new Vector3d(scale, 1));
+    }
+
+    public static Matrix4d getTransform(Vector3d pos, Vector3d scale) {
         return new Matrix4d()
-                .translate(new Vector3d(pos, 0))
-                .scale(new Vector3d(scale, 1));
+                .translate(pos)
+                .scale(scale);
     }
 
     public static Matrix4d getOrthographicMatrix(ACEntity camera, ACWindow window) {
         Matrix4d mat = new Matrix4d();
 
-        double near = 50d;
-        double far = -50d;
+        double near = -50d;
+        double far = 50d;
 
         double ratio = (double) window.getWidth() / window.getHeight();
 
-        double scale = 1d;
+        double scale = 0.5d;
 
-        return mat.ortho(-ratio * scale, ratio * scale, -scale, scale, near, far);
+        return mat.ortho(-scale * ratio, scale * ratio, -scale, scale, near, far);
     }
 }

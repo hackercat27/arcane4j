@@ -6,6 +6,7 @@ import ca.hackercat.arcane.core.asset.ACAssetManager;
 import org.lwjgl.glfw.*;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 
 public class ACWindow implements ACDisposable {
 
@@ -18,6 +19,8 @@ public class ACWindow implements ACDisposable {
         public void invoke(long l, int width, int height) {
             ACWindow.this.width = width;
             ACWindow.this.height = height;
+
+            glViewport(0, 0, width, height);
         }
     };
 
