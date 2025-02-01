@@ -1,7 +1,9 @@
 package ca.hackercat.arcane.core;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ACThreadManager {
 
@@ -21,16 +23,39 @@ public class ACThreadManager {
         }
     }
 
-    private static int gid = 0;
     private static final List<ACThread> threads = new ArrayList<>();
 
+    /**
+     * NOT SYNCHRONIZED!!!!!
+     */
+    private static int getFirstAvailableID() {
+        threads.sort(Comparator.comparingInt(o -> o.id));
+        for (int i = 0; i < threads.size(); i++) {
+            if (threads.get(i).id != i) {
+                return i;
+            }
+        }
+        return threads.size();
+    }
+
+    public static <T> Thread execute(T value, Consumer<T> consumer) {
+        return execute(() -> consumer.accept(value));
+    }
+
     public static Thread execute(Runnable runnable) {
-        int id = gid++;
-        Thread t = new Thread(runnable, String.format("arcane-worker%d", id));
-        ACThread threadStruct = new ACThread(t, id);
-        threads.add(threadStruct);
-        t.start();
-        threadStruct.started = true;
+        return execute(runnable, "arcane-worker%d");
+    }
+
+    public static Thread execute(Runnable runnable, String name) {
+        Thread t;
+        synchronized (threads) {
+            int id = 1;
+            t = new Thread(runnable, name);
+            ACThread threadStruct = new ACThread(t, id);
+            threads.add(threadStruct);
+            t.start();
+            threadStruct.started = true;
+        }
         return t;
     }
 
@@ -43,6 +68,16 @@ public class ACThreadManager {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    public static void parallelFor(int iterationCount, Consumer<Integer> body) {
+        Thread[] threads = new Thread[iterationCount];
+
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = execute(i, body);
+        }
+
+        blockUntilTermination(threads);
     }
 
     public static void throwIfNotMainThread() {

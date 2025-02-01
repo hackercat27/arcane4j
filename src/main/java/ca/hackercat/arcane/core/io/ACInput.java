@@ -27,7 +27,7 @@ public class ACInput implements ACDisposable {
 
     private static GLFWKeyCallback callback = new GLFWKeyCallback() {
         @Override
-        public void invoke(long window, int code, int action, int mods, int scancode) {
+        public void invoke(long window, int code, int mods, int action, int scancode) {
             synchronized (binds) {
                 for (Bind bind : binds) {
                     if (bind.keyNum == code) {
@@ -42,6 +42,12 @@ public class ACInput implements ACDisposable {
             }
         }
     };
+
+    static {
+        addAction("right", "d");
+        addAction("left", "a");
+        addAction("jump", "space");
+    }
 
     public static void init(long window) {
         ACThreadManager.throwIfNotMainThread();
@@ -115,13 +121,15 @@ public class ACInput implements ACDisposable {
             return -1;
         }
 
+        String prefix = "GLFW_KEY_";
+
         for (Field field : GLFW.class.getFields()) {
             String fieldName = field.getName();
-            if (!fieldName.matches("GLFW_KEY_.*")) {
+            if (!fieldName.matches(prefix+".*")) {
                 continue;
             }
 
-            if (fieldName.equalsIgnoreCase(keyName)) {
+            if (fieldName.equalsIgnoreCase(prefix+keyName)) {
                 try {
                     return (int) field.get(null);
                 }

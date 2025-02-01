@@ -64,7 +64,7 @@ public class ACFileUtils {
     private static ACAssetIndex assetIndex;
 
     static {
-        assetIndex = fromJson(readStringFromPath(ASSET_INDEX_PATH), ACAssetIndex.class);
+        assetIndex = fromJson(ACAssetIndex.class, readStringFromPath(ASSET_INDEX_PATH));
     }
 
     public static String simplifyPath(String path) {
@@ -155,7 +155,7 @@ public class ACFileUtils {
 
         // if the inputstream is STILL null, then that means we didn't find anything.
         if (in == null) {
-            ACLogger.warn("Couldn't find file '" + simplePath + "'");
+            ACLogger.warn("Couldn't find file '%s'", simplePath);
         }
         return in;
     }
@@ -166,7 +166,7 @@ public class ACFileUtils {
         return assetIndex.getAsset(name);
     }
 
-    public static <T> T fromJson(String json, Class<T> clazz) {
+    public static <T> T fromJson(Class<T> clazz, String json) {
         return new Gson().fromJson(json, clazz);
     }
 

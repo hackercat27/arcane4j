@@ -1,6 +1,12 @@
 package ca.hackercat.arcane.logging;
 
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
+
 import java.io.PrintStream;
+
+import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.Color.*;
 
 public class ACLogger {
 
@@ -9,15 +15,21 @@ public class ACLogger {
     public static final PrintStream out;
 
     static {
+        AnsiConsole.systemInstall();
         out = System.out;
         warn = System.out;
         err = System.out;
+
     }
 
     public enum Level {
-        INFO,
-        WARN,
-        ERROR
+        INFO(BLUE),
+        WARN(YELLOW),
+        ERROR(RED);
+        final Ansi.Color color;
+        Level(Ansi.Color color) {
+            this.color = color;
+        }
     }
 
     public static void error(Object o, Object... args) {
@@ -44,9 +56,18 @@ public class ACLogger {
         write(Level.INFO, message, args);
     }
 
+    private static String getTime() {
+        return "time here"; // TODO: implement
+    }
+
     private static void write(Level level, String message, Object... args) {
-        out.printf(message, args);
-        out.println();
+        out.println(
+                ansi().a(String.format("[%s] [%s/", getTime(), Thread.currentThread().getName()))
+                      .fg(level.color)
+                      .a(level.name())
+                      .reset()
+                      .a("]: ")
+                      .a(String.format(message, args)));
     }
 
 }

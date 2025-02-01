@@ -22,6 +22,11 @@
         "mat4,projection,generic.projection_matrix",
         "vec4,color,custom.object_color"
       ]
+    },
+    {
+      "type": "jdict",
+      "name": "arcane.lang.en_us",
+      "path": "res:/lang/en_us.json"
     }
   ]
 }

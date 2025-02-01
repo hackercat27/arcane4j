@@ -5,12 +5,10 @@ import ca.hackercat.arcane.core.asset.ACMeshFactory;
 import ca.hackercat.arcane.core.asset.ACShaderFactory;
 import ca.hackercat.arcane.core.io.ACInput;
 import ca.hackercat.arcane.core.io.ACWindow;
+import ca.hackercat.arcane.engine.ACGameManager;
 import ca.hackercat.arcane.logging.ACLogger;
-import org.joml.Vector2d;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-
-import java.awt.Color;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -18,10 +16,16 @@ import static org.lwjgl.opengl.GL30.*;
 public class ACWindowManager {
 
     private long windowPtr;
+    private boolean closeRequested;
 
+    private ACGameManager gameManager;
 
     public ACWindowManager() {
+        gameManager = new ACGameManager();
+    }
 
+    public boolean closeRequested() {
+        return this.closeRequested;
     }
 
     public int startWindow() {
@@ -64,29 +68,36 @@ public class ACWindowManager {
         ACRenderer renderer = new ACRenderer(windowObj);
         ACInput.init(windowPtr);
 
-        while (!glfwWindowShouldClose(windowPtr)) {
+        Thread updateThread = ACThreadManager.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                double targetTime = 1 / 60d;
+
+                while (!closeRequested()) {
+                    gameManager.update(targetTime);
+                    try {
+                        Thread.sleep((long) (targetTime * 1000));
+                    }
+                    catch (InterruptedException e) {
+
+                    }
+                }
+                ACLogger.log("Update thread exited");
+            }
+        }, "arcane-update");
+
+        while (!closeRequested) {
 
             // MUST update before polling events
             ACInput.update();
 
             glfwPollEvents();
-//            glClearColor(0f, 0f, 0f, 1f);
-            glClear(GL_DEPTH_BUFFER_BIT);
+            closeRequested = glfwWindowShouldClose(windowPtr);
 
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-            double z = System.currentTimeMillis() / 1000d;
-
-            double x = Math.cos(z) / 2d + 0.5;
-            double y = Math.sin(z) / 2d + 0.5;
-
-            renderer.setScale(new Vector2d(0.5d, 0.5d));
-
-            renderer.setColor(Color.BLACK);
-            renderer.drawRect(renderer.getScreenBounds(), 2);
-            renderer.setColor(Color.WHITE);
-            renderer.drawRect(new Vector2d(x, y - 0.5), new Vector2d(0.5, 0.5), 1);
-            renderer.setColor(Color.RED);
-            renderer.drawRect(new Vector2d(-1, 0), new Vector2d(1, 1), 1.5);
+            gameManager.render(renderer, 0);
 
             ACMeshFactory.createMeshes();
             ACShaderFactory.createShaders();
@@ -97,6 +108,8 @@ public class ACWindowManager {
             ACAssetManager.clean();
         }
 
+        ACThreadManager.blockUntilTermination(updateThread);
+
         ACAssetManager.forceDisposeAll();
 
         GL.destroy();
@@ -104,6 +117,8 @@ public class ACWindowManager {
         glfwMakeContextCurrent(0);
         glfwDestroyWindow(windowPtr);
         glfwTerminate();
+
+        ACLogger.log("Released system resources");
 
         return 0;
     }
