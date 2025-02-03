@@ -1,7 +1,7 @@
 package ca.hackercat.arcane.core.io;
 
 import ca.hackercat.arcane.core.ACThreadManager;
-import ca.hackercat.arcane.core.asset.ACDisposable;
+import ca.hackercat.arcane.core.asset.ACAsset;
 import ca.hackercat.arcane.logging.ACLogger;
 import com.google.gson.Gson;
 
@@ -160,7 +160,7 @@ public class ACFileUtils {
         return in;
     }
 
-    public static ACDisposable getAsset(String name) {
+    public static ACAsset getAsset(String name) {
         // CAN NOT call on main thread because it'll lock up if true
         ACThreadManager.throwIfMainThread();
         return assetIndex.getAsset(name);

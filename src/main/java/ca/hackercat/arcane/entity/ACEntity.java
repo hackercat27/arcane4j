@@ -1,7 +1,7 @@
 package ca.hackercat.arcane.entity;
 
 import ca.hackercat.arcane.core.ACRenderer;
-import ca.hackercat.arcane.entity.component.ACEntityComponent;
+import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
@@ -16,15 +16,15 @@ public class ACEntity {
     private Vector2d position = new Vector2d();
     private Vector2d velocity = new Vector2d();
 
-    private final List<ACEntityComponent> components = new ArrayList<>();
+    private final List<ACComponent> components = new ArrayList<>();
 
-    public ACEntity(ACEntityComponent... components) {
+    public ACEntity(ACComponent... components) {
         synchronized (components) {
             this.components.addAll(List.of(components));
         }
     }
 
-    public ACEntity addComponent(ACEntityComponent component) {
+    public ACEntity addComponent(ACComponent component) {
         if (component == null) {
             return this;
         }
@@ -42,9 +42,9 @@ public class ACEntity {
         return getComponentOfType(clazz) != null;
     }
 
-    public <T> ACEntityComponent getComponentOfType(Class<T> clazz) {
+    public <T> ACComponent getComponentOfType(Class<T> clazz) {
         synchronized (components) {
-            for (ACEntityComponent component : components) {
+            for (ACComponent component : components) {
                 if (component.getClass() == clazz) {
                     return component;
                 }
@@ -56,7 +56,7 @@ public class ACEntity {
     public void update(double deltaTime) {
         position.add(new Vector2d(velocity).mul(deltaTime));
         synchronized (components) {
-            for (ACEntityComponent component : components) {
+            for (ACComponent component : components) {
                 component.update(this, deltaTime);
             }
         }
@@ -65,7 +65,7 @@ public class ACEntity {
     public void updateCollision(double deltaTime) {
         position.add(new Vector2d(velocity).mul(deltaTime));
         synchronized (components) {
-            for (ACEntityComponent component : components) {
+            for (ACComponent component : components) {
                 component.updateCollision(this, null, deltaTime);
             }
         }
@@ -73,7 +73,7 @@ public class ACEntity {
 
     public void render(ACRenderer renderer, double interp) {
         synchronized (components) {
-            for (ACEntityComponent component : components) {
+            for (ACComponent component : components) {
                 component.render(this, renderer, interp);
             }
         }
@@ -81,7 +81,7 @@ public class ACEntity {
 
     public boolean onGround() {
         synchronized (components) {
-            for (ACEntityComponent component : components) {
+            for (ACComponent component : components) {
                 if (component instanceof ACActorPhysicsComponent c) {
                     return c.isOnGround();
                 }
@@ -111,7 +111,16 @@ public class ACEntity {
     }
 
     public void setPosition(double x, double y) {
-        this.position.set(x, y);
+        setX(x);
+        setY(y);
+    }
+
+    public void setX(double x) {
+        this.position.x = x;
+    }
+
+    public void setY(double y) {
+        this.position.y = y;
     }
 
     public void setVelocity(Vector2d velocity) {

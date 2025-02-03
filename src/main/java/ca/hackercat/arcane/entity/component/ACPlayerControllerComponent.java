@@ -4,7 +4,7 @@ import ca.hackercat.arcane.core.io.ACInput;
 import ca.hackercat.arcane.entity.ACEntity;
 import org.joml.Vector2d;
 
-public class ACPlayerControllerComponent implements ACEntityComponent {
+public class ACPlayerControllerComponent implements ACComponent {
 
     private double speed = 1;
 
@@ -21,8 +21,15 @@ public class ACPlayerControllerComponent implements ACEntityComponent {
         }
         desiredVelocity.mul(speed);
 
+        if (ACInput.isActionJustPressed("jump")) {
+            Vector2d v = parent.getVelocity();
+            v.y = 4;
+            parent.setVelocity(v);
+        }
 
-        parent.getVelocity().set(desiredVelocity);
+        Vector2d v = parent.getVelocity();
+        v.x = desiredVelocity.x;
+        parent.setVelocity(v);
 
     }
 }

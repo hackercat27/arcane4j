@@ -1,8 +1,6 @@
 package ca.hackercat.arcane.core;
 
 import ca.hackercat.arcane.core.asset.ACAssetManager;
-import ca.hackercat.arcane.core.asset.ACMeshFactory;
-import ca.hackercat.arcane.core.asset.ACShaderFactory;
 import ca.hackercat.arcane.core.io.ACInput;
 import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.engine.ACGameManager;
@@ -77,11 +75,10 @@ public class ACWindowManager {
                 while (!closeRequested()) {
                     gameManager.update(targetTime);
                     try {
+                        //noinspection BusyWait
                         Thread.sleep((long) (targetTime * 1000));
                     }
-                    catch (InterruptedException e) {
-
-                    }
+                    catch (InterruptedException ignored) {}
                 }
                 ACLogger.log("Update thread exited");
             }
@@ -99,13 +96,13 @@ public class ACWindowManager {
 
             gameManager.render(renderer, 0);
 
-            ACMeshFactory.createMeshes();
-            ACShaderFactory.createShaders();
+            ACAssetManager.registerAssets();
+            ACAssetManager.clean();
+            ACThreadManager.clean();
             renderer.handleDrawQueue();
 
             glfwSwapBuffers(windowPtr);
 
-            ACAssetManager.clean();
         }
 
         ACThreadManager.blockUntilTermination(updateThread);

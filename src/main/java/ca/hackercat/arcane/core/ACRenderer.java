@@ -1,7 +1,6 @@
 package ca.hackercat.arcane.core;
 
 import ca.hackercat.arcane.core.asset.ACMesh;
-import ca.hackercat.arcane.core.asset.ACMeshFactory;
 import ca.hackercat.arcane.core.asset.ACShader;
 import ca.hackercat.arcane.core.asset.ACTexture;
 import ca.hackercat.arcane.core.io.ACFileUtils;
@@ -49,7 +48,7 @@ public class ACRenderer {
         // but fuck writing code to load arbitrary meshes when this
         // is probably gonna be the only mesh thats used
         ACThreadManager.execute(() -> {
-            quad = ACMeshFactory.get(new Vector3d[] { // positions
+            quad = new ACMesh(new Vector3d[] { // positions
                     new Vector3d(0, 0, 0),
                     new Vector3d(1, 0, 0),
                     new Vector3d(1, 1, 0),
@@ -170,12 +169,14 @@ public class ACRenderer {
 
     private void handleDrawRect(Vector3d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
 
-        if (quad == null || !quad.registered || shader == null || !shader.registered) {
+        if (quad == null || !quad.registered()
+                || shader == null || !shader.registered()) {
             // silently fail instead of crashing
             return;
         }
 
         ACThreadManager.throwIfNotMainThread();
+
 
         Matrix4d transform = ACMath.getTransform(position, size);
 

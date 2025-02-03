@@ -1,7 +1,7 @@
 package ca.hackercat.arcane.core.io;
 
-import ca.hackercat.arcane.core.asset.ACDisposable;
-import ca.hackercat.arcane.core.asset.ACShaderFactory;
+import ca.hackercat.arcane.core.asset.ACAsset;
+import ca.hackercat.arcane.core.asset.ACShader;
 import ca.hackercat.arcane.core.io.ACFileUtils.FileType;
 import ca.hackercat.arcane.logging.ACLogger;
 
@@ -27,9 +27,9 @@ public class ACAssetIndex {
 
     public Element[] elements;
 
-    private Map<String, ACDisposable> cache = new HashMap<>();
+    private Map<String, ACAsset> cache = new HashMap<>();
 
-    public ACDisposable getAsset(String name) {
+    public ACAsset getAsset(String name) {
 
         if (cache.containsKey(name)) {
             return cache.get(name);
@@ -40,7 +40,7 @@ public class ACAssetIndex {
         for (Element element : elements) {
             if (element.name.equals(name)) {
 
-                ACDisposable asset = null;
+                ACAsset asset = null;
                 FileType type = FileType.getFromValue(element.type);
 
                 if (type == null) {
@@ -49,8 +49,9 @@ public class ACAssetIndex {
 
                 switch (type) {
                     case SHADER ->
-                            asset = ACShaderFactory.get(element.name,
-                                    element.vertex, element.fragment);
+                            asset = new ACShader(element.name,
+                                                 element.vertex,
+                                                 element.fragment);
                 }
 
                 if (asset == null) {

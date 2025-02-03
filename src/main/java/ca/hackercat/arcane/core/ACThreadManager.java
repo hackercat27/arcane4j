@@ -1,5 +1,7 @@
 package ca.hackercat.arcane.core;
 
+import ca.hackercat.arcane.util.ACStringUtils;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -9,10 +11,10 @@ public class ACThreadManager {
 
     // "struct"
     private static class ACThread {
+
         Thread thread;
         int id;
         boolean started;
-
         public ACThread(Thread thread, int id) {
             this.thread = thread;
             this.id = id;
@@ -21,13 +23,11 @@ public class ACThreadManager {
         public boolean halted() {
             return started && !thread.isAlive();
         }
+
     }
 
     private static final List<ACThread> threads = new ArrayList<>();
 
-    /**
-     * NOT SYNCHRONIZED!!!!!
-     */
     private static int getFirstAvailableID() {
         threads.sort(Comparator.comparingInt(o -> o.id));
         for (int i = 0; i < threads.size(); i++) {
@@ -38,19 +38,33 @@ public class ACThreadManager {
         return threads.size();
     }
 
+    public static void clean() {
+
+        List<ACThread> terminated = new ArrayList<>();
+        synchronized (threads) {
+            for (ACThread thread : threads) {
+                if (thread.halted()) {
+                    terminated.add(thread);
+                }
+            }
+            threads.removeAll(terminated);
+        }
+
+    }
+
     public static <T> Thread execute(T value, Consumer<T> consumer) {
         return execute(() -> consumer.accept(value));
     }
 
     public static Thread execute(Runnable runnable) {
-        return execute(runnable, "arcane-worker%d");
+        return execute(runnable, "arcane-worker${custom.thread_id}");
     }
 
     public static Thread execute(Runnable runnable, String name) {
         Thread t;
         synchronized (threads) {
             int id = 1;
-            t = new Thread(runnable, name);
+            t = new Thread(runnable, ACStringUtils.resolve(name, String.format("custom.thread_id=%d", id)));
             ACThread threadStruct = new ACThread(t, id);
             threads.add(threadStruct);
             t.start();

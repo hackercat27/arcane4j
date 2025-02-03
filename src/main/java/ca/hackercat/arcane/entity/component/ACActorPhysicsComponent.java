@@ -4,7 +4,7 @@ import ca.hackercat.arcane.entity.ACCollisionBody;
 import ca.hackercat.arcane.entity.ACEntity;
 import org.joml.Vector2d;
 
-public class ACActorPhysicsComponent implements ACEntityComponent {
+public class ACActorPhysicsComponent implements ACComponent {
 
     boolean onGround = false;
 

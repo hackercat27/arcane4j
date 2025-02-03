@@ -6,7 +6,7 @@ import org.joml.Vector2d;
 
 import java.awt.Color;
 
-public class ACActorRenderComponent implements ACEntityComponent {
+public class ACActorRenderComponent implements ACComponent {
 
     @Override
     public void render(ACEntity parent, ACRenderer r, double t) {

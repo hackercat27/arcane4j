@@ -1,5 +1,7 @@
 package ca.hackercat.arcane.core.asset;
 
+import ca.hackercat.arcane.core.io.ACFileUtils;
+import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Matrix4d;
 import org.joml.Matrix4f;
 import org.joml.Vector2d;
@@ -14,7 +16,7 @@ import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL20.*;
 
-public class ACShader implements ACDisposable {
+public class ACShader implements ACAsset {
 
     private static class Uniform {
         public String name;
@@ -30,12 +32,18 @@ public class ACShader implements ACDisposable {
     public String vertexPath, fragmentPath;
     public int vertexID, fragmentID, programID;
     private boolean disposable;
-    public boolean registered;
+    private boolean registered;
+
+    private int error = 0;
+    private int ERROR_LINK_BIT = 1;
+    private int ERROR_INVALID_PROGRAM_BIT = 2;
 
     public ACShader(String name, String vertexPath, String fragmentPath) {
         this.name = name == null? toString() : name;
         this.vertexPath = vertexPath;
         this.fragmentPath = fragmentPath;
+
+        ACAssetManager.register(this);
     }
 
     public int getUniformLocation(String uniformName) {
@@ -77,6 +85,53 @@ public class ACShader implements ACDisposable {
         new Matrix4f(value).get(buf);
         glUniformMatrix4fv(getUniformLocation(name), false, buf);
         MemoryUtil.memFree(buf);
+    }
+
+    @Override
+    public boolean registered() {
+        return registered;
+    }
+
+    @Override
+    public void register() {
+        String vertexSource = ACFileUtils.readStringFromPath(this.vertexPath);
+        String fragmentSource = ACFileUtils.readStringFromPath(this.fragmentPath);
+
+        this.programID = glCreateProgram();
+        this.vertexID = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(this.vertexID, vertexSource);
+        glCompileShader(this.vertexID);
+
+        if (glGetShaderi(this.vertexID, GL_COMPILE_STATUS) == GL_FALSE) {
+            ACLogger.error(this.vertexPath + " couldn't compile\n"
+                                   + glGetShaderInfoLog(this.vertexID));
+        }
+
+        this.fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(this.fragmentID, fragmentSource);
+        glCompileShader(this.fragmentID);
+        if (glGetShaderi(this.fragmentID, GL_COMPILE_STATUS) == GL_FALSE) {
+            ACLogger.error(this.fragmentPath + " couldn't compile\n"
+                                   + glGetShaderInfoLog(this.fragmentID));
+        }
+
+        glAttachShader(this.programID, this.vertexID);
+        glAttachShader(this.programID, this.fragmentID);
+
+        glLinkProgram(this.programID);
+        if (glGetProgrami(this.programID, GL_LINK_STATUS) == GL_FALSE) {
+            ACLogger.error("Shader " + this.name + " initialization error - Couldn't link program\n"
+                                   + glGetProgramInfoLog(this.programID));
+            error |= ERROR_LINK_BIT;
+        }
+        glValidateProgram(this.programID);
+        if (glGetProgrami(this.programID, GL_VALIDATE_STATUS) == GL_FALSE) {
+            ACLogger.error("Shader " + this.name + " initialization error Program is invalid\n"
+                                   + glGetProgramInfoLog(this.programID));
+            error |= ERROR_INVALID_PROGRAM_BIT;
+        }
+
+        registered = true;
     }
 
     @Override

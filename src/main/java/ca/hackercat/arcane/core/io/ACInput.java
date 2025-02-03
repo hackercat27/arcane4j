@@ -1,7 +1,6 @@
 package ca.hackercat.arcane.core.io;
 
 import ca.hackercat.arcane.core.ACThreadManager;
-import ca.hackercat.arcane.core.asset.ACDisposable;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.lwjgl.glfw.*;
 
@@ -11,7 +10,7 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class ACInput implements ACDisposable {
+public class ACInput {
 
     private static class Bind {
         String name;
@@ -29,6 +28,7 @@ public class ACInput implements ACDisposable {
         @Override
         public void invoke(long window, int code, int mods, int action, int scancode) {
             synchronized (binds) {
+
                 for (Bind bind : binds) {
                     if (bind.keyNum == code) {
                         if (action == GLFW_PRESS) {
@@ -39,6 +39,7 @@ public class ACInput implements ACDisposable {
                         }
                     }
                 }
+
             }
         }
     };
@@ -46,7 +47,7 @@ public class ACInput implements ACDisposable {
     static {
         addAction("right", "d");
         addAction("left", "a");
-        addAction("jump", "space");
+        addAction("jump", "k");
     }
 
     public static void init(long window) {
@@ -54,13 +55,10 @@ public class ACInput implements ACDisposable {
         glfwSetKeyCallback(window, callback);
     }
 
-    @Override
-    public boolean isDisposable() {
-        return false;
-    }
-
-    @Override
-    public void dispose() {
+    public static void dispose() {
+        if (!ACThreadManager.isMainThread()) {
+            return;
+        }
         callback.free();
     }
 
