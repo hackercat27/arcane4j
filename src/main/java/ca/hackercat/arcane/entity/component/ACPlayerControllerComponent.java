@@ -1,6 +1,7 @@
 package ca.hackercat.arcane.entity.component;
 
 import ca.hackercat.arcane.core.io.ACInput;
+import ca.hackercat.arcane.core.io.ACInputAction;
 import ca.hackercat.arcane.entity.ACEntity;
 import ca.hackercat.arcane.util.ACMath;
 import org.joml.Vector2d;
@@ -18,19 +19,19 @@ public class ACPlayerControllerComponent implements ACComponent {
         Vector2d desiredVelocity = new Vector2d();
         Vector2d v = parent.getVelocity();
 
-        if (ACInput.isActionHeld("left")) {
+        if (ACInput.isActionHeld(ACInputAction.LEFT)) {
             desiredVelocity.x -= 12;
         }
-        if (ACInput.isActionHeld("right")) {
+        if (ACInput.isActionHeld(ACInputAction.RIGHT)) {
             desiredVelocity.x += 12;
         }
         desiredVelocity.mul(speed);
 
-        if (ACInput.isActionJustPressed("jump")) {
+        if (ACInput.isActionJustPressed(ACInputAction.JUMP)) {
             v.y = 16;
             canSlowFall = true;
         }
-        else if (canSlowFall && v.y > 0 && ACInput.isActionHeld("jump")) {
+        else if (canSlowFall && v.y > 0 && ACInput.isActionHeld(ACInputAction.JUMP)) {
             v.add(ACEntity.getGravity().mul(-0.6 * deltaTime));
         }
         else {

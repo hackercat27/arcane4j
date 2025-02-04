@@ -13,8 +13,8 @@ import static org.lwjgl.glfw.GLFW.*;
 public class ACInput {
 
     private static class Bind {
-        ACInputAction name;
-        String key;
+        ACInputAction action;
+        String keyName;
         int keyNum;
         int lastPressed = -2; // init so that it doesnt think it was pressed on the first tick of adding it
         int lastReleased = -1;
@@ -40,6 +40,7 @@ public class ACInput {
                     }
                 }
 
+
             }
         }
     };
@@ -47,6 +48,10 @@ public class ACInput {
     public static void init(long window) {
         ACThreadManager.throwIfNotMainThread();
         glfwSetKeyCallback(window, callback);
+
+        for (ACInputAction action : ACInputAction.values()) {
+            addAction(action, action.getDefaultValue());
+        }
 
     }
 
@@ -61,14 +66,15 @@ public class ACInput {
         tick++;
     }
 
-    public static void addAction(ACInputAction name, String key) {
+    public static void addAction(ACInputAction action, String keyName) {
         Bind bind = new Bind();
-        bind.name = name;
-        bind.key = key;
-        bind.keyNum = getGLFWKeyCode(key);
+        bind.action = action;
+        bind.keyName = keyName;
+        bind.keyNum = getGLFWKeyCode(keyName);
         synchronized (binds) {
             binds.add(bind);
         }
+        ACLogger.log("Added bind '%s' to key '%s'", action.toString(), keyName);
     }
 
     public static boolean isActionHeld(ACInputAction action) {
@@ -98,7 +104,7 @@ public class ACInput {
     private static Bind getBindByName(ACInputAction action) {
         synchronized (binds) {
             for (Bind bind : binds) {
-                if (bind.name == action) {
+                if (bind.action == action) {
                     return bind;
                 }
             }
@@ -112,6 +118,7 @@ public class ACInput {
         }
 
         String prefix = "GLFW_KEY_";
+        String qualifiedName = prefix + keyName.toUpperCase();
 
         for (Field field : GLFW.class.getFields()) {
             String fieldName = field.getName();
@@ -119,7 +126,7 @@ public class ACInput {
                 continue;
             }
 
-            if (fieldName.equalsIgnoreCase(prefix+keyName)) {
+            if (fieldName.equalsIgnoreCase(qualifiedName)) {
                 try {
                     return (int) field.get(null);
                 }

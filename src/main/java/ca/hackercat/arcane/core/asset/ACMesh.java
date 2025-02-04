@@ -1,6 +1,5 @@
 package ca.hackercat.arcane.core.asset;
 
-import ca.hackercat.arcane.core.io.ACInput;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 import org.lwjgl.system.MemoryUtil;
@@ -86,8 +85,6 @@ public class ACMesh implements ACAsset {
         }
 
         if (this.normals != null) {
-
-            ACInput.isActionHeld("there was no string in this code");
 
             DoubleBuffer normalBuffer = MemoryUtil.memAllocDouble(this.normals.length * 3);
             double[] normalData = new double[this.normals.length * 3];
