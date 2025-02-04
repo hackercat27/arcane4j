@@ -13,11 +13,11 @@ import static org.lwjgl.glfw.GLFW.*;
 public class ACInput {
 
     private static class Bind {
-        String name;
+        ACInputAction name;
         String key;
         int keyNum;
-        int lastPressed;
-        int lastReleased;
+        int lastPressed = -2; // init so that it doesnt think it was pressed on the first tick of adding it
+        int lastReleased = -1;
     }
 
     private static int tick = 0;
@@ -44,15 +44,10 @@ public class ACInput {
         }
     };
 
-    static {
-        addAction("right", "d");
-        addAction("left", "a");
-        addAction("jump", "k");
-    }
-
     public static void init(long window) {
         ACThreadManager.throwIfNotMainThread();
         glfwSetKeyCallback(window, callback);
+
     }
 
     public static void dispose() {
@@ -63,13 +58,10 @@ public class ACInput {
     }
 
     public static void update() {
-        if (!ACThreadManager.isMainThread()) {
-            return;
-        }
         tick++;
     }
 
-    public static void addAction(String name, String key) {
+    public static void addAction(ACInputAction name, String key) {
         Bind bind = new Bind();
         bind.name = name;
         bind.key = key;
@@ -79,7 +71,7 @@ public class ACInput {
         }
     }
 
-    public static boolean isActionAsserted(String action) {
+    public static boolean isActionHeld(ACInputAction action) {
         Bind bind = getBindByName(action);
         if (bind == null) {
             return false;
@@ -87,7 +79,7 @@ public class ACInput {
         return bind.lastPressed > bind.lastReleased;
     }
 
-    public static boolean isActionJustPressed(String action) {
+    public static boolean isActionJustPressed(ACInputAction action) {
         Bind bind = getBindByName(action);
         if (bind == null) {
             return false;
@@ -95,7 +87,7 @@ public class ACInput {
         return bind.lastPressed == tick;
     }
 
-    public static boolean isActionJustReleased(String action) {
+    public static boolean isActionJustReleased(ACInputAction action) {
         Bind bind = getBindByName(action);
         if (bind == null) {
             return false;
@@ -103,10 +95,10 @@ public class ACInput {
         return bind.lastReleased == tick;
     }
 
-    private static Bind getBindByName(String action) {
+    private static Bind getBindByName(ACInputAction action) {
         synchronized (binds) {
             for (Bind bind : binds) {
-                if (bind.name.equals(action)) {
+                if (bind.name == action) {
                     return bind;
                 }
             }
