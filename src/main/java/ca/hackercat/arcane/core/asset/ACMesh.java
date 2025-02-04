@@ -87,7 +87,7 @@ public class ACMesh implements ACAsset {
 
         if (this.normals != null) {
 
-            ACInput.isActionAsserted("there was no string in this code");
+            ACInput.isActionHeld("there was no string in this code");
 
             DoubleBuffer normalBuffer = MemoryUtil.memAllocDouble(this.normals.length * 3);
             double[] normalData = new double[this.normals.length * 3];

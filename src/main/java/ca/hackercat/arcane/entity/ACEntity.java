@@ -11,9 +11,10 @@ import java.util.List;
 
 public class ACEntity {
 
-    private static Vector2d gravity = new Vector2d(0, -9.8);
+    private static Vector2d gravity = new Vector2d(0, -72);
 
     private Vector2d position = new Vector2d();
+    private Vector2d lastPosition = new Vector2d();
     private Vector2d velocity = new Vector2d();
 
     private final List<ACComponent> components = new ArrayList<>();
@@ -54,6 +55,7 @@ public class ACEntity {
     }
 
     public void update(double deltaTime) {
+        lastPosition.set(position);
         position.add(new Vector2d(velocity).mul(deltaTime));
         synchronized (components) {
             for (ACComponent component : components) {
@@ -63,7 +65,6 @@ public class ACEntity {
     }
 
     public void updateCollision(double deltaTime) {
-        position.add(new Vector2d(velocity).mul(deltaTime));
         synchronized (components) {
             for (ACComponent component : components) {
                 component.updateCollision(this, null, deltaTime);
@@ -99,7 +100,7 @@ public class ACEntity {
     }
 
     public Vector2d getPosition(double interp) {
-        return position.get(new Vector2d());
+        return new Vector2d(lastPosition).lerp(position, interp);
     }
 
     public Vector2d getVelocity() {

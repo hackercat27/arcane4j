@@ -177,7 +177,6 @@ public class ACRenderer {
 
         ACThreadManager.throwIfNotMainThread();
 
-
         Matrix4d transform = ACMath.getTransform(position, size);
 
         glBindVertexArray(quad.vao);
@@ -192,8 +191,7 @@ public class ACRenderer {
         shader.setUniform("camera", getTransform());
 
         shader.setUniform("color", color);
-
-
+        
         glDrawElements(GL_TRIANGLES, quad.indices.length, GL_UNSIGNED_INT, 0);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -16,6 +16,11 @@ public class ACWindowManager {
     private long windowPtr;
     private boolean closeRequested;
 
+    private double targetTPS = 64;
+
+    private long lastUpdateTimestampNanos;
+    private long lastUpdateDurationNanos;
+
     private ACGameManager gameManager;
 
     public ACWindowManager() {
@@ -66,35 +71,39 @@ public class ACWindowManager {
         ACRenderer renderer = new ACRenderer(windowObj);
         ACInput.init(windowPtr);
 
-        Thread updateThread = ACThreadManager.execute(new Runnable() {
-            @Override
-            public void run() {
+        Thread updateThread = ACThreadManager.execute(() -> {
 
-                double targetTime = 1 / 60d;
 
-                while (!closeRequested()) {
-                    gameManager.update(targetTime);
-                    try {
-                        //noinspection BusyWait
-                        Thread.sleep((long) (targetTime * 1000));
-                    }
-                    catch (InterruptedException ignored) {}
+            while (!closeRequested()) {
+                long start = System.nanoTime();
+                long targetTimeNanos = (long) (1_000_000_000 / targetTPS);
+                gameManager.update(lastUpdateDurationNanos / 1_000_000_000d);
+                lastUpdateTimestampNanos = System.nanoTime();
+                ACInput.update();
+
+                long extraTimeNanos = System.nanoTime() - start;
+                long millis = extraTimeNanos / 1_000_000;
+                int nanos = (int) (extraTimeNanos % 1_000_000);
+                try {
+                    //noinspection BusyWait
+                    Thread.sleep(millis, nanos);
                 }
-                ACLogger.log("Update thread exited");
+                catch (InterruptedException ignored) {}
+                lastUpdateDurationNanos = System.nanoTime() - start;
             }
+            ACLogger.log("Update thread exited");
         }, "arcane-update");
 
         while (!closeRequested) {
-
-            // MUST update before polling events
-            ACInput.update();
 
             glfwPollEvents();
             closeRequested = glfwWindowShouldClose(windowPtr);
 
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-            gameManager.render(renderer, 0);
+            double interp = (double) (System.nanoTime() - lastUpdateTimestampNanos) / lastUpdateDurationNanos;
+
+            gameManager.render(renderer, interp);
 
             ACAssetManager.registerAssets();
             ACAssetManager.clean();
