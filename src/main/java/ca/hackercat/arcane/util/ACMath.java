@@ -13,14 +13,20 @@ public class ACMath {
 
     public static double PI = 3.141592653589793;
     public static double TAU = 6.283185307179586;
+    public static double EPSILON = 0.0001;
 
-    public static double approach(double value, double target, double maxDelta) {
-        double delta = target - value;
-
-        if (Math.abs(maxDelta) < delta) {
-            return value + Math.copySign(delta, Math.abs(maxDelta));
+    public static double approach(double value, double target, double delta) {
+        double trueDelta = target - value;
+        if (Math.abs(value - target) < EPSILON) {
+            return value;
         }
-        return value + delta;
+
+        // is delta too big?
+        if (Math.abs(delta) > Math.abs(trueDelta)) {
+            return value + trueDelta;
+        }
+        // else its smaller anyways so just add it
+        return value + Math.copySign(delta, trueDelta);
     }
 
     public static Matrix4d getTransform(Vector2d pos, Vector2d scale) {

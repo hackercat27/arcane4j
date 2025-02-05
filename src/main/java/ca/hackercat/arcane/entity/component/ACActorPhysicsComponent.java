@@ -18,6 +18,7 @@ public class ACActorPhysicsComponent implements ACComponent {
     @Override
     public void updateCollision(ACEntity parent, ACCollisionBody body, double deltaTime) {
         Vector2d p = parent.getPosition();
+        onGround = false;
         if (p.y <= -3) {
             p.y = -3;
             parent.setPosition(p);

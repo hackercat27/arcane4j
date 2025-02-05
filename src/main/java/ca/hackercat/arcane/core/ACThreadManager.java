@@ -1,5 +1,6 @@
 package ca.hackercat.arcane.core;
 
+import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACStringUtils;
 
 import java.util.ArrayList;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ACThreadManager {
+
+    private static Thread mainThread;
 
     // "struct"
     private static class ACThread {
@@ -84,6 +87,26 @@ public class ACThreadManager {
         }
     }
 
+    public static <T> void parallelFor(List<T> list, Consumer<T> body) {
+        if (list == null || body == null) {
+            return;
+        }
+        Thread[] threads = new Thread[list.size()];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = execute(i, index -> {
+                T listEntry;
+                synchronized (list) {
+                    listEntry = list.get(index);
+                }
+                if (listEntry != null) {
+                    body.accept(list.get(index));
+                }
+            });
+        }
+
+        blockUntilTermination(threads);
+    }
+
     public static void parallelFor(int iterationCount, Consumer<Integer> body) {
         Thread[] threads = new Thread[iterationCount];
 
@@ -106,9 +129,32 @@ public class ACThreadManager {
         }
     }
 
+    public static void setMainThread() {
+        Thread current = Thread.currentThread();
+        String threadName = current.getName();
+        if (!threadName.matches("main")) {
+            ACLogger.warn("Setting thread '%s' as 'main' thread, will likely cause problems", threadName);
+        }
+        mainThread = current;
+    }
+
     public static boolean isMainThread() {
-        String threadName = Thread.currentThread().getName();
-        return threadName.matches("main");
+        return Thread.currentThread().equals(mainThread);
+    }
+
+    public static void sleepNanos(long nanos) throws InterruptedException {
+        long millis = nanos / 1_000_000;
+        int truncatedNanos = (int) (nanos % 1_000_000);
+        Thread.sleep(millis, truncatedNanos);
+    }
+
+    public static void sleepMillis(long millis) throws InterruptedException {
+        Thread.sleep(millis);
+    }
+
+    public static void sleep(double seconds) throws InterruptedException {
+        long nanos = (long) (seconds * 1e9);
+        sleepNanos(nanos);
     }
 
 }

@@ -5,6 +5,7 @@ import ca.hackercat.arcane.core.io.ACInput;
 import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.engine.ACGameManager;
 import ca.hackercat.arcane.logging.ACLogger;
+import ca.hackercat.arcane.util.ACGenericManager;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
@@ -38,10 +39,7 @@ public class ACWindowManager {
 
         GLFWErrorCallback.createPrint(ACLogger.err).set();
 
-        if (!ACThreadManager.isMainThread()) {
-            ACLogger.error("Cannot run %s.startWindow() on non-main thread!", getClass());
-            return -1;
-        }
+        ACThreadManager.setMainThread();
 
         ACLogger.log("Initializing GLFW");
 
@@ -72,21 +70,19 @@ public class ACWindowManager {
         ACInput.init(windowPtr);
 
         Thread updateThread = ACThreadManager.execute(() -> {
-
-
             while (!closeRequested()) {
                 long start = System.nanoTime();
-                long targetTimeNanos = (long) (1_000_000_000 / targetTPS);
-                gameManager.update(lastUpdateDurationNanos / 1_000_000_000d);
-                lastUpdateTimestampNanos = System.nanoTime();
+                long targetTimeNanos = (long) (1e9 / targetTPS);
+                double deltaTime = lastUpdateDurationNanos / 1e9;
+                gameManager.update(deltaTime);
                 ACInput.update();
+                ACGenericManager.update(deltaTime);
+                lastUpdateTimestampNanos = System.nanoTime();
 
                 long extraTimeNanos = System.nanoTime() - start;
-                long millis = extraTimeNanos / 1_000_000;
-                int nanos = (int) (extraTimeNanos % 1_000_000);
+
                 try {
-                    //noinspection BusyWait
-                    Thread.sleep(millis, nanos);
+                    ACThreadManager.sleepNanos(extraTimeNanos);
                 }
                 catch (InterruptedException ignored) {}
                 lastUpdateDurationNanos = System.nanoTime() - start;
