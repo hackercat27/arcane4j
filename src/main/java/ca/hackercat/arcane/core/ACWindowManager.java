@@ -90,6 +90,8 @@ public class ACWindowManager {
             ACLogger.log("Update thread exited");
         }, "arcane-update");
 
+        glEnable(GL_DEPTH_TEST);
+
         while (!closeRequested) {
 
             glfwPollEvents();

@@ -3,6 +3,7 @@ package ca.hackercat.arcane.util;
 import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.entity.ACEntity;
 import org.joml.Matrix4d;
+import org.joml.Quaterniond;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 
@@ -54,5 +55,21 @@ public class ACMath {
         double scale = 0.5d;
 
         return mat.ortho(-scale * ratio, scale * ratio, -scale, scale, near, far);
+    }
+
+    public static Matrix4d getPerspectiveMatrix(ACEntity camera, ACWindow window, double fov) {
+        // i'll bet you 20 bucks this code never gets used for anything
+        Matrix4d mat = new Matrix4d();
+
+        double near = 0.1;
+        double far = 1000d;
+
+        double ratio = (double) window.getWidth() / window.getHeight();
+
+        double scale = 0.5d;
+
+        return mat.perspective(fov, ratio, near, far)
+                  .translate(new Vector3d(0, 0, -1))
+                  .rotate(new Quaterniond().rotateAxis(0.7, 0, 1, 0));
     }
 }

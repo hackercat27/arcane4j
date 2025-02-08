@@ -18,12 +18,19 @@ import java.util.List;
 public class ACStageManager {
 
     private final List<ACEntity> entities = new ArrayList<>();
+    private ACMap map;
 
     public ACStageManager() {
         entities.add(new ACEntity()
                              .addComponent(new ACPlayerControllerComponent())
                              .addComponent(new ACActorRenderComponent())
                              .addComponent(new ACActorPhysicsComponent()));
+
+        changeStage("res:/maps/map.json");
+    }
+
+    public void changeStage(String path) {
+        map = new ACMap(path);
     }
 
     public void update(double deltaTime) {
@@ -32,6 +39,9 @@ public class ACStageManager {
                 e.update(deltaTime);
                 e.updateCollision(deltaTime);
             }
+        }
+        if (map != null) {
+            map.update(deltaTime);
         }
     }
 
@@ -44,6 +54,9 @@ public class ACStageManager {
             for (ACEntity e : entities) {
                 e.render(r, t);
             }
+        }
+        if (map != null) {
+            map.render(r, t);
         }
     }
 
