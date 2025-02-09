@@ -40,8 +40,8 @@ public class ACMath {
 
     public static Matrix4d getTransform(Vector3d pos, Vector3d scale) {
         return new Matrix4d()
-                .translate(pos)
-                .scale(scale);
+                .scale(scale)
+                .translate(pos);
     }
 
     public static Matrix4d getOrthographicMatrix(ACEntity camera, ACWindow window) {

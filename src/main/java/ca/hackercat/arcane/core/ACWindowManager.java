@@ -79,6 +79,7 @@ public class ACWindowManager {
                 ACGenericManager.update(deltaTime);
                 lastUpdateTimestampNanos = System.nanoTime();
 
+
                 long extraTimeNanos = System.nanoTime() - start;
 
                 try {

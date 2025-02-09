@@ -10,11 +10,11 @@ public class ACPlayerControllerComponent implements ACComponent {
 
     private double maxSpeed = 14;
     private double hardGroundSpeedCap = 30;
-    private double groundAccel = 160;
+    private double groundAccel = 200;
     private double airAccel = 60;
 
     private double airFriction = 4;
-    private double groundFriction = 80;
+    private double groundFriction = 120;
 
     private boolean canSlowFall = false;
     private boolean canFastFall = false;
@@ -23,7 +23,8 @@ public class ACPlayerControllerComponent implements ACComponent {
     private double fastFallGravityMul = 1.6;
 
     private double jumpVelocity = 14;
-    private double jumpVelocitySpeedMul = 0.5;
+    private double jumpVelocityOffset = 4;
+    private double jumpVelocitySpeedMul = 0.2;
     private double maxJumpVelocitySpeed = 2;
 
     private double bunnyHopMul = 1.2;
@@ -48,7 +49,8 @@ public class ACPlayerControllerComponent implements ACComponent {
 
         if (ACInput.isActionJustPressed(ACInputAction.JUMP) && parent.onGround() && velocity.y < 0) {
             double jumpVelocity = this.jumpVelocity +
-                    Math.min(Math.abs(velocity.x) * jumpVelocitySpeedMul, maxJumpVelocitySpeed);
+                    Math.max(0, Math.min((Math.abs(velocity.x) - jumpVelocityOffset) * jumpVelocitySpeedMul,
+                                         maxJumpVelocitySpeed));
             velocity.y = Math.max(velocity.y + jumpVelocity, jumpVelocity);
             velocity.x *= bunnyHopMul;
             canSlowFall = true;

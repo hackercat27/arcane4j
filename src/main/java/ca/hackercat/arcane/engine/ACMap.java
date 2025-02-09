@@ -4,7 +4,6 @@ import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.core.io.ACFileUtils;
 import ca.hackercat.arcane.engine.tiled.TiledMap;
 import ca.hackercat.arcane.logging.ACLogger;
-import org.joml.Matrix4d;
 import org.joml.Vector2d;
 
 import java.awt.Color;
@@ -44,8 +43,6 @@ public class ACMap {
 
     public void render(ACRenderer r, double t) {
 
-        Matrix4d transform = r.getTransform();
-
         r.setColor(Color.MAGENTA);
 
         if (tileIDs != null) {
@@ -60,7 +57,6 @@ public class ACMap {
             }
         }
 
-        r.setTransform(transform);
     }
 
 }

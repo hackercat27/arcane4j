@@ -138,7 +138,8 @@ public class ACRenderer {
         double ratio = (double) window.getWidth() / window.getHeight();
         double scale = 0.5;
         return new Rectangled(-ratio * scale, -scale, ratio * scale, scale)
-                .translate(translation).scale(1/this.scale.x, 1/this.scale.y);
+                .translate(translation)
+                .scale(1/this.scale.x, 1/this.scale.y);
     }
 
     public void drawRect(Vector2d position, Vector2d size) {

@@ -143,12 +143,18 @@ public class ACThreadManager {
     }
 
     public static void sleepNanos(long nanos) throws InterruptedException {
+        if (nanos < 0) {
+            return;
+        }
         long millis = nanos / 1_000_000;
         int truncatedNanos = (int) (nanos % 1_000_000);
         Thread.sleep(millis, truncatedNanos);
     }
 
     public static void sleepMillis(long millis) throws InterruptedException {
+        if (millis < 0) {
+            return;
+        }
         Thread.sleep(millis);
     }
 
