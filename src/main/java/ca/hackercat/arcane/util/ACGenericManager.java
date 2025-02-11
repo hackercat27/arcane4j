@@ -20,7 +20,6 @@ public class ACGenericManager {
 
     }
 
-
     public static void register(ACUpdatable updatable) {
         synchronized (updatable) {
             updatables.add(updatable);

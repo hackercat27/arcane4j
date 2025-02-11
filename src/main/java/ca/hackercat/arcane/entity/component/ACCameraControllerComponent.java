@@ -14,7 +14,7 @@ public class ACCameraControllerComponent implements ACComponent {
     @Override
     public void update(ACEntity parent, double deltaTime) {
         Vector2d pos = parent.getPosition();
-        Vector2d targetPos = tracked.getPosition();
+        Vector2d targetPos = tracked.getPosition().add(0.5, 0.5);
 
         Vector2d delta = targetPos.sub(pos, new Vector2d());
 

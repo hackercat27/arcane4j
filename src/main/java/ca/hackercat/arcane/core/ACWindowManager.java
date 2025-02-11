@@ -21,6 +21,7 @@ public class ACWindowManager {
 
     private long lastUpdateTimestampNanos;
     private long lastUpdateDurationNanos;
+    private long lastFrameDurationNanos;
 
     private ACGameManager gameManager;
 
@@ -94,7 +95,7 @@ public class ACWindowManager {
         glEnable(GL_DEPTH_TEST);
 
         while (!closeRequested) {
-
+            long frameStartNanos = System.nanoTime();
             glfwPollEvents();
             closeRequested = glfwWindowShouldClose(windowPtr);
 
@@ -110,6 +111,7 @@ public class ACWindowManager {
             renderer.handleDrawQueue();
 
             glfwSwapBuffers(windowPtr);
+            lastFrameDurationNanos = System.nanoTime() - frameStartNanos;
 
         }
 

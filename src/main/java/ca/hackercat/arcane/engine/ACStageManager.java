@@ -2,7 +2,6 @@ package ca.hackercat.arcane.engine;
 
 import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.entity.ACEntity;
-import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
 import ca.hackercat.arcane.entity.component.ACActorRenderComponent;
 import ca.hackercat.arcane.entity.component.ACCameraControllerComponent;
 import ca.hackercat.arcane.entity.component.ACPlayerControllerComponent;
@@ -28,7 +27,8 @@ public class ACStageManager {
         ACEntity player = new ACEntity()
                              .addComponent(new ACPlayerControllerComponent())
                              .addComponent(new ACActorRenderComponent())
-                             .addComponent(new ACActorPhysicsComponent());
+//                             .addComponent(new ACActorPhysicsComponent())
+                ;
         ACEntity camera = new ACEntity()
                 .addComponent(new ACCameraControllerComponent(player));
 
@@ -61,6 +61,8 @@ public class ACStageManager {
 
     public void render(ACRenderer r, double t) {
 
+        r.setColor(Color.ORANGE);
+        r.drawRect(r.getScreenBounds());
 
         r.setColor(Color.WHITE);
         r.setTransform(new Matrix4d());

@@ -159,6 +159,13 @@ public class ACRenderer {
     }
 
     public void drawRect(Vector3d position, Vector2d size) {
+        Rectangled toDraw = new Rectangled(new Vector2d(position.x, position.y),
+                                           new Vector2d(size).add(position.x, position.y));
+
+        if (!toDraw.intersectsRectangle(getScreenBounds())) {
+            return;
+        }
+
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.RECT);
         request.position = new Vector3d().set(position);
         request.size = new Vector2d().set(size);

@@ -26,7 +26,7 @@ public class ACLogger {
         INFO(BLUE),
         WARN(YELLOW),
         ERROR(RED);
-        final Ansi.Color color;
+        public final Ansi.Color color;
         Level(Ansi.Color color) {
             this.color = color;
         }

@@ -29,15 +29,42 @@ public class ACPlayerControllerComponent implements ACComponent {
 
     private double bunnyHopMul = 1.2;
 
+    private boolean noclip = true;
+
     private double fastFallMaxYVelocity = 0;
     private ACTimer fastFallDelayTimer = new ACTimer(0.08);
 
     @Override
     public void update(ACEntity parent, double deltaTime) {
 
-        Vector2d desiredVelocity = new Vector2d();
         Vector2d velocity = parent.getVelocity();
 
+        if (noclip) {
+            Vector2d desiredVelocity = new Vector2d();
+            if (ACInput.isActionHeld(ACInputAction.LEFT)) {
+                desiredVelocity.x -= maxSpeed;
+            }
+            if (ACInput.isActionHeld(ACInputAction.RIGHT)) {
+                desiredVelocity.x += maxSpeed;
+            }
+            if (ACInput.isActionHeld(ACInputAction.CROUCH)) {
+                desiredVelocity.y -= maxSpeed;
+            }
+            if (ACInput.isActionHeld(ACInputAction.JUMP)) {
+                desiredVelocity.y += maxSpeed;
+            }
+            velocity.set(desiredVelocity);
+        }
+        else {
+            movement(parent, velocity, deltaTime);
+        }
+
+        parent.setVelocity(velocity);
+    }
+
+    private void movement(ACEntity parent, Vector2d velocity, double deltaTime) {
+
+        Vector2d desiredVelocity = new Vector2d();
 
         if (ACInput.isActionHeld(ACInputAction.LEFT)) {
             desiredVelocity.x -= 12;
@@ -84,8 +111,6 @@ public class ACPlayerControllerComponent implements ACComponent {
         if (Math.abs(velocity.x) > Math.abs(hardGroundSpeedCap)) {
             velocity.x = Math.copySign(hardGroundSpeedCap, velocity.x);
         }
-
-        parent.setVelocity(velocity);
     }
 
     private void handleMovement(Vector2d velocity, Vector2d desiredVelocity, boolean onGround, double deltaTime) {

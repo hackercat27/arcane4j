@@ -2,13 +2,17 @@ package ca.hackercat.arcane.engine;
 
 import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.core.io.ACFileUtils;
+import ca.hackercat.arcane.engine.tiled.TiledLayer;
 import ca.hackercat.arcane.engine.tiled.TiledMap;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
+import org.joml.Vector2i;
 
 import java.awt.Color;
 
 public class ACMap {
+
+    private Vector2i offset = new Vector2i();
 
     private int width;
     private int height;
@@ -21,19 +25,13 @@ public class ACMap {
 
         TiledMap map = ACFileUtils.fromJson(TiledMap.class, ACFileUtils.readStringFromPath(path));
 
-        width = 10;
-        height = 10;
-        tileIDs = new int[width * height];
+        TiledLayer layer = map.getContentLayer();
 
-        tileIDs[0] = 1;
-        tileIDs[2] = 1;
-        tileIDs[4] = 1;
-        tileIDs[6] = 1;
-        tileIDs[width + 1] = 1;
-        tileIDs[width + 3] = 1;
-        tileIDs[width + 5] = 1;
-        tileIDs[width + 7] = 1;
+        tileIDs = layer.getData();
+        width = layer.getWidth();
+        height = layer.getHeight();
 
+        offset.set(layer.getOffset());
 
     }
 
@@ -51,7 +49,7 @@ public class ACMap {
                     int i = y * width + x;
 
                     if (tileIDs[i] != 0) {
-                        r.drawRect(new Vector2d(x, y), new Vector2d(1, 1), -2);
+                        r.drawRect(new Vector2d(x - offset.x, y - offset.y), new Vector2d(1, 1), -2);
                     }
                 }
             }

@@ -23,4 +23,15 @@ public class TiledMap {
     public TiledTileset[] tilesets;
     public String type;
     public String version;
+
+    public TiledLayer getContentLayer() {
+
+        for (TiledLayer layer : layers) {
+            if ("content".equals(layer.name)) {
+                return layer;
+            }
+        }
+
+        return null;
+    }
 }
