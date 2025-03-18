@@ -2,6 +2,7 @@ package ca.hackercat.arcane.engine;
 
 import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.entity.ACEntity;
+import ca.hackercat.arcane.entity.ACTeam;
 import ca.hackercat.arcane.entity.component.ACActorRenderComponent;
 import ca.hackercat.arcane.entity.component.ACCameraControllerComponent;
 import ca.hackercat.arcane.entity.component.ACPlayerControllerComponent;
@@ -24,12 +25,12 @@ public class ACStageManager {
     private Vector2d cameraPos = new Vector2d();
 
     public ACStageManager() {
-        ACEntity player = new ACEntity()
+        ACEntity player = new ACEntity(ACTeam.PLAYER)
                              .addComponent(new ACPlayerControllerComponent())
                              .addComponent(new ACActorRenderComponent())
 //                             .addComponent(new ACActorPhysicsComponent())
-                ;
-        ACEntity camera = new ACEntity()
+                             ;
+        ACEntity camera = new ACEntity(ACTeam.UNASSIGNED)
                 .addComponent(new ACCameraControllerComponent(player));
 
         entities.add(player);
@@ -61,14 +62,15 @@ public class ACStageManager {
 
     public void render(ACRenderer r, double t) {
 
-        r.setColor(Color.ORANGE);
-        r.drawRect(r.getScreenBounds());
 
-        r.setColor(Color.WHITE);
         r.setTransform(new Matrix4d());
         r.setTranslation(new Vector2d().sub(cameraPos));
 
+
+        r.setColor(Color.WHITE);
         r.scale(new Vector2d(0.1, 0.1));
+        r.setColor(Color.ORANGE);
+        r.drawRect(r.getScreenBounds());
         synchronized (entities) {
             for (ACEntity e : entities) {
                 e.render(r, t);

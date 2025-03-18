@@ -35,8 +35,8 @@ public class ACShader implements ACAsset {
     private boolean registered;
 
     private int error = 0;
-    private int ERROR_LINK_BIT = 1;
-    private int ERROR_INVALID_PROGRAM_BIT = 2;
+    private int ERROR_LINK_BIT = 0b1;
+    private int ERROR_INVALID_PROGRAM_BIT = 0b10;
 
     public ACShader(String name, String vertexPath, String fragmentPath) {
         this.name = name == null? toString() : name;

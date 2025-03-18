@@ -17,9 +17,13 @@ public class ACEntity {
     private Vector2d lastPosition = new Vector2d();
     private Vector2d velocity = new Vector2d();
 
+    private ACCollisionBody body = new ACCollisionBody();
+
+    private ACTeam team;
+
     private final List<ACComponent> components = new ArrayList<>();
 
-    public ACEntity(ACComponent... components) {
+    public ACEntity(ACTeam team, ACComponent... components) {
         synchronized (components) {
             this.components.addAll(List.of(components));
         }
@@ -105,6 +109,10 @@ public class ACEntity {
 
     public Vector2d getVelocity() {
         return velocity.get(new Vector2d());
+    }
+
+    public ACCollisionBody getBody() {
+        return this.body;
     }
 
     public void setPosition(Vector2d position) {

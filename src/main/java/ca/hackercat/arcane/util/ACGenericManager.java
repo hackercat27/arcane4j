@@ -7,7 +7,6 @@ public class ACGenericManager {
 
     private static final List<ACUpdatable> updatables = new ArrayList<>();
 
-
     private ACGenericManager() {}
 
     public static void update(double deltaTime) {

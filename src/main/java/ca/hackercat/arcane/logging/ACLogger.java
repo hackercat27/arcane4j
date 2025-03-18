@@ -19,7 +19,6 @@ public class ACLogger {
         out = System.out;
         warn = System.out;
         err = System.out;
-
     }
 
     public enum Level {
@@ -61,6 +60,10 @@ public class ACLogger {
     }
 
     private static void write(Level level, String message, Object... args) {
+
+        // redundancy - fix at some point
+        String prefix = String.format("[%s] [%s/", getTime(), Thread.currentThread().getName()) + level.name() + "]: ";
+
         out.println(
                 ansi().a(String.format("[%s] [%s/", getTime(), Thread.currentThread().getName()))
                       .fg(level.color)

@@ -14,16 +14,14 @@ public class ACActorPhysicsComponent implements ACComponent {
         parent.setVelocity(parent.getVelocity().add(ACEntity.getGravity().mul(deltaTime)));
     }
 
-
     @Override
     public void updateCollision(ACEntity parent, ACCollisionBody body, double deltaTime) {
         Vector2d p = parent.getPosition();
-        onGround = false;
-        if (p.y <= -3) {
-            p.y = -3;
-            parent.setPosition(p);
-            onGround = true;
+
+        if (body.intersects(parent.getBody())) {
+
         }
+
     }
 
     public boolean isOnGround() {

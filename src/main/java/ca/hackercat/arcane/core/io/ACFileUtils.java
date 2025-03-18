@@ -16,8 +16,8 @@ public class ACFileUtils {
         FILE("file:", ""),
         RESOURCE("res:", "assets");
 
-        public final String value;
-        public final String expansion;
+        private final String value;
+        private final String expansion;
 
         Directive(String value, String expansion) {
             this.value = value;
@@ -31,6 +31,17 @@ public class ACFileUtils {
                 }
             }
             return null;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String expand() {
+            if (this == FILE) {
+                return System.getProperty("user.dir");
+            }
+            return expansion;
         }
     }
 
@@ -90,7 +101,7 @@ public class ACFileUtils {
         else if (containsDirectives) {
             String newPath = path;
             for (Directive d : Directive.values()) {
-                newPath = newPath.replaceAll(d.value, d.expansion);
+                newPath = newPath.replaceAll(d.getValue(), d.expand());
             }
             return simplifyPath(newPath);
         }
