@@ -1,7 +1,6 @@
 package ca.hackercat.arcane.entity.component;
 
 import ca.hackercat.arcane.core.io.ACInput;
-import ca.hackercat.arcane.core.io.ACInputAction;
 import ca.hackercat.arcane.entity.ACEntity;
 import ca.hackercat.arcane.util.ACTimer;
 import org.joml.Vector2d;
@@ -41,16 +40,16 @@ public class ACPlayerControllerComponent implements ACComponent {
 
         if (noclip) {
             Vector2d desiredVelocity = new Vector2d();
-            if (ACInput.isActionHeld(ACInputAction.LEFT)) {
+            if (ACInput.isActionHeld("left")) {
                 desiredVelocity.x -= maxSpeed;
             }
-            if (ACInput.isActionHeld(ACInputAction.RIGHT)) {
+            if (ACInput.isActionHeld("right")) {
                 desiredVelocity.x += maxSpeed;
             }
-            if (ACInput.isActionHeld(ACInputAction.CROUCH)) {
+            if (ACInput.isActionHeld("crouch")) {
                 desiredVelocity.y -= maxSpeed;
             }
-            if (ACInput.isActionHeld(ACInputAction.JUMP)) {
+            if (ACInput.isActionHeld("jump")) {
                 desiredVelocity.y += maxSpeed;
             }
             velocity.set(desiredVelocity);
@@ -66,15 +65,15 @@ public class ACPlayerControllerComponent implements ACComponent {
 
         Vector2d desiredVelocity = new Vector2d();
 
-        if (ACInput.isActionHeld(ACInputAction.LEFT)) {
+        if (ACInput.isActionHeld("left")) {
             desiredVelocity.x -= 12;
         }
-        if (ACInput.isActionHeld(ACInputAction.RIGHT)) {
+        if (ACInput.isActionHeld("right")) {
             desiredVelocity.x += 12;
         }
         desiredVelocity.mul(maxSpeed);
 
-        if (ACInput.isActionJustPressed(ACInputAction.JUMP) && parent.onGround() && velocity.y < 0) {
+        if (ACInput.isActionJustPressed("jump") && parent.onGround() && velocity.y < 0) {
             double jumpVelocity = this.jumpVelocity +
                     Math.max(0, Math.min((Math.abs(velocity.x) - jumpVelocityOffset) * jumpVelocitySpeedMul,
                                          maxJumpVelocitySpeed));
@@ -84,18 +83,18 @@ public class ACPlayerControllerComponent implements ACComponent {
             fastFallDelayTimer.reset();
             canFastFall = false;
         }
-        if (canSlowFall && velocity.y > 0 && ACInput.isActionHeld(ACInputAction.JUMP)) {
+        if (canSlowFall && velocity.y > 0 && ACInput.isActionHeld("jump")) {
             velocity.add(ACEntity.getGravity().mul((slowFallGravityMul - 1) * deltaTime));
         }
         else {
             canSlowFall = false;
         }
 
-        if (fastFallDelayTimer.triggered() && ACInput.isActionJustPressed(ACInputAction.FAST_FALL)) {
+        if (fastFallDelayTimer.triggered() && ACInput.isActionJustPressed("fast_fall")) {
             canFastFall = true;
         }
 
-        if (canFastFall && ACInput.isActionHeld(ACInputAction.FAST_FALL)) {
+        if (canFastFall && ACInput.isActionHeld("fast_fall")) {
             canSlowFall = false;
             velocity.add(ACEntity.getGravity().mul((fastFallGravityMul - 1) * deltaTime));
             velocity.y = Math.min(velocity.y, fastFallMaxYVelocity);

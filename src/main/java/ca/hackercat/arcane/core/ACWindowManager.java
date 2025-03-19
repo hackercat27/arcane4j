@@ -78,7 +78,9 @@ public class ACWindowManager {
                 long start = System.nanoTime();
                 long targetTimeNanos = (long) (1e9 / targetTPS);
                 double deltaTime = lastUpdateDurationNanos / 1e9;
-                gameManager.update(deltaTime);
+                if (gameManager != null) {
+                    gameManager.update(deltaTime);
+                }
                 ACInput.update();
                 ACGenericManager.update(deltaTime);
                 lastUpdateTimestampNanos = System.nanoTime();
@@ -106,7 +108,9 @@ public class ACWindowManager {
 
             double interp = (double) (System.nanoTime() - lastUpdateTimestampNanos) / lastUpdateDurationNanos;
 
-            gameManager.render(renderer, interp);
+            if (gameManager != null) {
+                gameManager.render(renderer, interp);
+            }
 
             ACAssetManager.registerAssets();
             ACAssetManager.clean();
