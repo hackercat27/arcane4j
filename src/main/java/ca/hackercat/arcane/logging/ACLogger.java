@@ -31,46 +31,42 @@ public class ACLogger {
         }
     }
 
-    public static void error(Object o, Object... args) {
-        write(Level.ERROR, String.valueOf(o), args);
+    public static void error(Object o) {
+        write(Level.ERROR, String.valueOf(o));
     }
 
     public static void error(String message, Object... args) {
-        write(Level.ERROR, message, args);
+        error(String.format(message, args));
     }
 
-    public static void warn(Object o, Object... args) {
-        write(Level.WARN, String.valueOf(o), args);
+    public static void warn(Object o) {
+        write(Level.WARN, String.valueOf(o));
     }
 
     public static void warn(String message, Object... args) {
-        write(Level.WARN, message, args);
+        warn(String.format(message, args));
     }
 
-    public static void log(Object o, Object... args) {
-        write(Level.INFO, String.valueOf(o), args);
+    public static void log(Object o) {
+        write(Level.INFO, String.valueOf(o));
     }
 
     public static void log(String message, Object... args) {
-        write(Level.INFO, message, args);
+        log(String.format(message, args));
     }
 
     private static String getTime() {
         return "time here"; // TODO: implement
     }
 
-    private static void write(Level level, String message, Object... args) {
-
-        // redundancy - fix at some point
-        String prefix = String.format("[%s] [%s/", getTime(), Thread.currentThread().getName()) + level.name() + "]: ";
-
+    private static void write(Level level, String message) {
         out.println(
                 ansi().a(String.format("[%s] [%s/", getTime(), Thread.currentThread().getName()))
                       .fg(level.color)
                       .a(level.name())
                       .reset()
                       .a("]: ")
-                      .a(String.format(message, args)));
+                      .a(message));
     }
 
 }

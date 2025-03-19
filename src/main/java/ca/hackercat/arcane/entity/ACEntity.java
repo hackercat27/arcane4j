@@ -1,6 +1,7 @@
 package ca.hackercat.arcane.entity;
 
 import ca.hackercat.arcane.core.ACRenderer;
+import ca.hackercat.arcane.core.ACThreadManager;
 import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
 import ca.hackercat.arcane.logging.ACLogger;
@@ -23,7 +24,12 @@ public class ACEntity {
 
     private final List<ACComponent> components = new ArrayList<>();
 
+    public ACEntity(ACTeam team) {
+        this.team = team;
+    }
+
     public ACEntity(ACTeam team, ACComponent... components) {
+        this.team = team;
         synchronized (components) {
             this.components.addAll(List.of(components));
         }
