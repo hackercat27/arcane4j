@@ -2,21 +2,9 @@ package ca.hackercat.arcane.engine;
 
 import ca.hackercat.arcane.core.ACRenderer;
 
-public class ACGameManager {
+public interface ACGameManager {
 
+    void update(double deltaTime);
 
-    private ACStageManager stageManager;
-
-    public ACGameManager() {
-        stageManager = new ACStageManager();
-    }
-
-    public void update(double deltaTime) {
-        stageManager.update(deltaTime);
-    }
-
-    public void render(ACRenderer r, double t) {
-        stageManager.render(r, t);
-    }
-
+    void render(ACRenderer r, double t);
 }

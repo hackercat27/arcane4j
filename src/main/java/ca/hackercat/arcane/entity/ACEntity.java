@@ -30,7 +30,7 @@ public class ACEntity {
 
     public ACEntity(ACTeam team, ACComponent... components) {
         this.team = team;
-        synchronized (components) {
+        synchronized (this.components) {
             this.components.addAll(List.of(components));
         }
     }
@@ -43,7 +43,7 @@ public class ACEntity {
             ACLogger.error("Entity already has component '%s'", component.getClass().getTypeName());
             return this;
         }
-        synchronized (components) {
+        synchronized (this.components) {
             this.components.add(component);
         }
         return this;
@@ -54,7 +54,7 @@ public class ACEntity {
     }
 
     public <T> ACComponent getComponentOfType(Class<T> clazz) {
-        synchronized (components) {
+        synchronized (this.components) {
             for (ACComponent component : components) {
                 if (component.getClass() == clazz) {
                     return component;

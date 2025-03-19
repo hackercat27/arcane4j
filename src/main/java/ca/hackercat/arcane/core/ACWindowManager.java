@@ -26,7 +26,10 @@ public class ACWindowManager {
     private ACGameManager gameManager;
 
     public ACWindowManager() {
-        gameManager = new ACGameManager();
+    }
+
+    public void setGameManager(ACGameManager gameManager) {
+        this.gameManager = gameManager;
     }
 
     public boolean closeRequested() {
