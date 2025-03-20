@@ -2,6 +2,7 @@ package ca.hackercat.arcane.core.io;
 
 import ca.hackercat.arcane.core.ACThreadManager;
 import ca.hackercat.arcane.logging.ACLogger;
+import org.joml.Vector2d;
 import org.lwjgl.glfw.*;
 
 import java.lang.reflect.Field;
@@ -20,11 +21,14 @@ public class ACInput {
         int lastReleased = -1;
     }
 
+    private static Vector2d cursorPos = new Vector2d();
+    private static boolean cursorOnScreen;
+
     private static int tick = 0;
 
     private static final List<Bind> binds = new ArrayList<>();
 
-    private static GLFWKeyCallback callback = new GLFWKeyCallback() {
+    private static GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int code, int mods, int action, int scancode) {
             synchronized (binds) {
@@ -40,21 +44,62 @@ public class ACInput {
                     }
                 }
 
+            }
+        }
+    };
+
+
+    private static GLFWMouseButtonCallback mouseButtonCallback = new GLFWMouseButtonCallback() {
+        @Override
+        public void invoke(long window, int code, int action, int mods) {
+            synchronized (binds) {
+
+                for (Bind bind : binds) {
+                    if (bind.keyNum == code) {
+                        if (action == GLFW_PRESS) {
+                            bind.lastPressed = tick;
+                        }
+                        if (action == GLFW_RELEASE) {
+                            bind.lastReleased = tick;
+                        }
+                    }
+                }
 
             }
         }
     };
 
+    private static GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
+        @Override
+        public void invoke(long window, double x, double y) {
+            cursorPos.x = x;
+            cursorPos.y = y;
+        }
+    };
+
+    private static GLFWCursorEnterCallback cursorEnterCallback = new GLFWCursorEnterCallback() {
+        @Override
+        public void invoke(long window, boolean onScreen) {
+            cursorOnScreen = onScreen;
+        }
+    };
+
     public static void init(long window) {
         ACThreadManager.throwIfNotMainThread();
-        glfwSetKeyCallback(window, callback);
+        glfwSetKeyCallback(window, keyCallback);
+        glfwSetCursorEnterCallback(window, cursorEnterCallback);
+        glfwSetCursorPosCallback(window, cursorPosCallback);
+        glfwSetMouseButtonCallback(window, mouseButtonCallback);
     }
 
     public static void dispose() {
         if (!ACThreadManager.isMainThread()) {
             return;
         }
-        callback.free();
+        keyCallback.free();
+        cursorEnterCallback.free();
+        cursorPosCallback.free();
+        mouseButtonCallback.free();
     }
 
     public static void update() {
@@ -112,16 +157,19 @@ public class ACInput {
             return -1;
         }
 
-        String prefix = "GLFW_KEY_";
-        String qualifiedName = prefix + keyName.toUpperCase();
+        String prefixKey = "GLFW_KEY_";
+        String prefixMouse = "GLFW_MOUSE_";
+
+        String qualifiedKeyName = prefixKey + keyName.toUpperCase();
+        String qualifiedMouseName = prefixMouse + keyName.toUpperCase();
 
         for (Field field : GLFW.class.getFields()) {
             String fieldName = field.getName();
-            if (!fieldName.matches(prefix+".*")) {
+            if (!(fieldName.matches(prefixKey + ".*") || fieldName.matches(prefixMouse + ".*"))) {
                 continue;
             }
 
-            if (fieldName.equalsIgnoreCase(qualifiedName)) {
+            if (fieldName.equalsIgnoreCase(qualifiedKeyName) || fieldName.equalsIgnoreCase(qualifiedMouseName)) {
                 try {
                     return (int) field.get(null);
                 }
@@ -131,5 +179,12 @@ public class ACInput {
 
         ACLogger.error("Couldn't find key %s", keyName);
         return -1;
+    }
+
+    public static Vector2d getCursorPos() {
+        if (cursorPos == null || !cursorOnScreen) {
+            return null;
+        }
+        return new Vector2d().set(cursorPos);
     }
 }
