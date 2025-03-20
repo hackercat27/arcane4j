@@ -1,5 +1,7 @@
 package ca.hackercat.arcane.logging;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -56,7 +58,9 @@ public class ACLogger {
     }
 
     private static String getTime() {
-        return "time here"; // TODO: implement
+        LocalTime time = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return time.format(formatter);
     }
 
     private static void write(Level level, String message) {
