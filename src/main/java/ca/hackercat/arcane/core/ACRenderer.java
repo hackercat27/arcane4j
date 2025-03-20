@@ -88,8 +88,8 @@ public class ACRenderer {
                 handled.add(request);
             }
             drawQueue.removeAll(handled);
-        }
 
+        }
     }
 
     public void setColor(Color color) {
@@ -136,6 +136,24 @@ public class ACRenderer {
 
     public Matrix4d getTransform() {
         return ACMath.getTransform(this.translation, this.scale);
+    }
+
+    public Vector2d screenspaceToWorldspace(Vector2d screenspace) {
+
+        screenspace.x -= window.getWidth() / 2d;
+        screenspace.y -= window.getHeight() / 2d;
+
+        screenspace.x /= window.getHeight();
+        screenspace.y /= -window.getHeight();
+
+        screenspace.x /= scale.x;
+        screenspace.y /= scale.y;
+
+        screenspace.x -= translation.x;
+        screenspace.y -= translation.y;
+
+        return screenspace;
+
     }
 
     public Rectangled getScreenBounds() {
