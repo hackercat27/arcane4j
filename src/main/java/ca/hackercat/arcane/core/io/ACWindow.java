@@ -13,10 +13,11 @@ public class ACWindow implements ACAsset {
     private long window;
     private int width;
     private int height;
+    private boolean registered;
 
     public GLFWWindowSizeCallback sizeCallback = new GLFWWindowSizeCallback() {
         @Override
-        public void invoke(long l, int width, int height) {
+        public void invoke(long window, int width, int height) {
             ACWindow.this.width = width;
             ACWindow.this.height = height;
 
@@ -29,7 +30,6 @@ public class ACWindow implements ACAsset {
         this.window = window;
         this.width = width;
         this.height = height;
-        glfwSetWindowSizeCallback(window, sizeCallback);
         ACAssetManager.register(this);
     }
 
@@ -43,12 +43,13 @@ public class ACWindow implements ACAsset {
 
     @Override
     public boolean registered() {
-        return true;
+        return registered;
     }
 
     @Override
     public void register() {
-
+        glfwSetWindowSizeCallback(window, sizeCallback);
+        registered = true;
     }
 
     @Override
@@ -58,6 +59,7 @@ public class ACWindow implements ACAsset {
 
     @Override
     public void dispose() {
-
+        sizeCallback.free();
+        registered = false;
     }
 }
