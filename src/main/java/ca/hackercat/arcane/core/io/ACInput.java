@@ -113,6 +113,9 @@ public class ACInput {
 
     public static void addAction(String action, String keyName) {
         Bind bind = new Bind(action, keyName, getGLFWKeyCode(keyName));
+        if (bind.keyNum < 0) {
+            return;
+        }
         synchronized (binds) {
             binds.add(bind);
         }
@@ -159,19 +162,22 @@ public class ACInput {
             return -1;
         }
 
-        String prefixKey = "(GLFW_KEY_)";
-        String prefixMouse = "(GLFW_MOUSE_)";
+        String prefixKey = "GLFW_KEY_";
+        String prefixMouse = "GLFW_MOUSE_";
 
         String qualifiedKeyName = prefixKey + keyName.toUpperCase();
         String qualifiedMouseName = prefixMouse + keyName.toUpperCase();
 
         for (Field field : GLFW.class.getFields()) {
             String fieldName = field.getName();
-            if (!(fieldName.matches(prefixKey + "|" + prefixMouse + ".*"))) {
+            if (!(fieldName.matches("^("+prefixKey+"|"+prefixMouse+").*$"))) {
                 continue;
             }
 
-            if (fieldName.equalsIgnoreCase(qualifiedKeyName) || fieldName.equalsIgnoreCase(qualifiedMouseName)) {
+            boolean isKey = fieldName.matches(qualifiedKeyName);
+            boolean isButton = fieldName.matches(qualifiedMouseName);
+
+            if (isKey || isButton) {
                 try {
                     return (int) field.get(null);
                 }
