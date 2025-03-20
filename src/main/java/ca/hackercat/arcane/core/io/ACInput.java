@@ -14,11 +14,17 @@ import static org.lwjgl.glfw.GLFW.*;
 public class ACInput {
 
     private static class Bind {
-        String action;
-        String keyName;
-        int keyNum;
-        int lastPressed = -2; // init so that it doesnt think it was pressed on the first tick of adding it
-        int lastReleased = -1;
+        public final String action;
+        public final String keyName;
+        public final int keyNum;
+        public int lastPressed = -2; // init so that it doesnt think it was pressed on the first tick of adding it
+        public int lastReleased = -1;
+
+        public Bind(String action, String keyName, int keyNum) {
+            this.action = action;
+            this.keyName = keyName;
+            this.keyNum = keyNum;
+        }
     }
 
     private static Vector2d cursorPos = new Vector2d();
@@ -47,7 +53,6 @@ public class ACInput {
             }
         }
     };
-
 
     private static GLFWMouseButtonCallback mouseButtonCallback = new GLFWMouseButtonCallback() {
         @Override
@@ -107,10 +112,7 @@ public class ACInput {
     }
 
     public static void addAction(String action, String keyName) {
-        Bind bind = new Bind();
-        bind.action = action;
-        bind.keyName = keyName;
-        bind.keyNum = getGLFWKeyCode(keyName);
+        Bind bind = new Bind(action, keyName, getGLFWKeyCode(keyName));
         synchronized (binds) {
             binds.add(bind);
         }
