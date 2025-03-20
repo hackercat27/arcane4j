@@ -123,7 +123,7 @@ public class ACWindowManager {
         }
 
         ACThreadManager.blockUntilTermination(updateThread);
-
+        ACInput.dispose();
         ACAssetManager.forceDisposeAll();
 
         GL.destroy();
