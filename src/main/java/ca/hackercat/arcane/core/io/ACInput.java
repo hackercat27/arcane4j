@@ -159,15 +159,15 @@ public class ACInput {
             return -1;
         }
 
-        String prefixKey = "GLFW_KEY_";
-        String prefixMouse = "GLFW_MOUSE_";
+        String prefixKey = "(GLFW_KEY_)";
+        String prefixMouse = "(GLFW_MOUSE_)";
 
         String qualifiedKeyName = prefixKey + keyName.toUpperCase();
         String qualifiedMouseName = prefixMouse + keyName.toUpperCase();
 
         for (Field field : GLFW.class.getFields()) {
             String fieldName = field.getName();
-            if (!(fieldName.matches(prefixKey + ".*") || fieldName.matches(prefixMouse + ".*"))) {
+            if (!(fieldName.matches(prefixKey + "|" + prefixMouse + ".*"))) {
                 continue;
             }
 
