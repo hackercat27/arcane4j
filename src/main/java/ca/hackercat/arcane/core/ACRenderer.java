@@ -130,6 +130,10 @@ public class ACRenderer {
         setScale(new Vector2d(s.x, s.y));
     }
 
+    public Matrix4d getProjection() {
+        return ACMath.getOrthographicMatrix(camera, window);
+    }
+
     public Matrix4d getTransform() {
         return ACMath.getTransform(this.translation, this.scale);
     }
@@ -194,7 +198,7 @@ public class ACRenderer {
 
         glUseProgram(shader.programID);
         shader.setUniform("transform", transform);
-        shader.setUniform("projection", ACMath.getOrthographicMatrix(camera, window));
+        shader.setUniform("projection", getProjection());
         shader.setUniform("camera", getTransform());
 
         shader.setUniform("color", color);
