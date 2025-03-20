@@ -5,7 +5,6 @@ import ca.hackercat.arcane.core.asset.ACShader;
 import ca.hackercat.arcane.core.io.ACFileUtils.FileType;
 import ca.hackercat.arcane.logging.ACLogger;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public class ACAssetIndex {
             }
         }
 
-        throw new RuntimeException(new FileNotFoundException("Couldn't find asset '" + name + "'!"));
+        return null;
     }
 
 }

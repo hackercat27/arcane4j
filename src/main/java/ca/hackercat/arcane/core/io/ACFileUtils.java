@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ACFileUtils {
 
@@ -70,12 +72,10 @@ public class ACFileUtils {
         }
     }
 
-    public static String ASSET_INDEX_PATH = "res:/index.json";
-
-    private static ACAssetIndex assetIndex;
+    private static final List<ACAssetIndex> indices = new ArrayList<>();
 
     static {
-        assetIndex = fromJson(ACAssetIndex.class, readStringFromPath(ASSET_INDEX_PATH));
+        registerIndex("res:/index.json");
     }
 
     public static String simplifyPath(String path) {
@@ -174,7 +174,19 @@ public class ACFileUtils {
     public static ACAsset getAsset(String name) {
         // CAN NOT call on main thread because it'll lock up if true
         ACThreadManager.throwIfMainThread();
-        return assetIndex.getAsset(name);
+
+        for (ACAssetIndex index : indices) {
+            ACAsset asset = index.getAsset(name);
+            if (asset != null) {
+                return asset;
+            }
+        }
+
+        throw new RuntimeException(new FileNotFoundException("Couldn't find asset '" + name + "'!"));
+    }
+
+    public static void registerIndex(String path) {
+        indices.add(fromJson(ACAssetIndex.class, readStringFromPath(path)));
     }
 
     public static <T> T fromJson(Class<T> clazz, String json) {
