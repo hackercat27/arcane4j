@@ -77,7 +77,7 @@ public class ACMesh implements ACAsset {
                 if (this.uvs[i] == null)
                     this.uvs[i] = new Vector2d();
                 textureData[i * 2] = (float) this.uvs[i].x();
-                textureData[(i * 2) + 1] = (float) this.uvs[i].y();
+                textureData[(i * 2) + 1] = (float) (1 - this.uvs[i].y());
             }
             textureUVBuffer.put(textureData).flip();
             this.textureUVBuffer = storeData(textureUVBuffer, 1, 2);
