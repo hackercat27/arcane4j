@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ACEntity {
 
-    private static Vector2d gravity = new Vector2d(0, -72);
+    private static Vector2d gravity = new Vector2d(0, 0);
 
     private Vector2d position = new Vector2d();
     private Vector2d lastPosition = new Vector2d();
@@ -74,10 +74,10 @@ public class ACEntity {
         }
     }
 
-    public void updateCollision(double deltaTime) {
+    public void updateCollision(ACCollisionBody body, double deltaTime) {
         synchronized (components) {
             for (ACComponent component : components) {
-                component.updateCollision(this, null, deltaTime);
+                component.updateCollision(this, body, deltaTime);
             }
         }
     }

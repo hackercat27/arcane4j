@@ -70,6 +70,6 @@ public class ACMath {
 
         return mat.perspective(fov, ratio, near, far)
                   .translate(new Vector3d(0, 0, -1))
-                  .rotate(new Quaterniond().rotateAxis(0.7, 0, 1, 0));
+                  .rotate(new Quaterniond().rotateAxis(Math.sin(System.currentTimeMillis() / 4000d), 0, 1, 0));
     }
 }

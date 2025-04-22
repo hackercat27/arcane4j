@@ -35,7 +35,7 @@ public class ACLogger {
         ACLevel minLevel;
         try {
 
-            String p = System.getProperty("hackercat.logging.level");
+            String p = System.getProperty("hackercat.arcane.loglevel");
 
             if (p == null) {
                 throw new IllegalArgumentException("Property not set");
@@ -57,6 +57,15 @@ public class ACLogger {
             return;
         }
 
+        String ansi = switch (level) {
+            case ACLevel.VERBOSE -> "\u001b[90m";
+            case ACLevel.WARN -> "\u001b[93m";
+            case ACLevel.ERROR -> "\u001b[91m";
+            case ACLevel.FATAL -> "\u001b[91;41m";
+            default -> "\u001b[0m";
+        };
+
+        stream.print(ansi);
         stream.printf("[%s] [%s/%s]: %s\n", getTime(), Thread.currentThread().getName(), level.name(), message);
     }
 }

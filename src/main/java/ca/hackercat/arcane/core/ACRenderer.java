@@ -9,6 +9,8 @@ import ca.hackercat.arcane.entity.ACEntity;
 import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACMath;
+import java.util.HashMap;
+import java.util.Map;
 import org.joml.Matrix4d;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
@@ -34,8 +36,7 @@ public class ACRenderer {
     private Vector2d scale = new Vector2d(1, 1);
     private Vector2d translation = new Vector2d();
 
-    private ACShader shaderGeneric;
-    private ACShader shaderColorable;
+    private final Map<String, ACShader> shaders = new HashMap<>();
 
     private Vector4d color = new Vector4d(1, 1, 1, 1);
 
@@ -67,9 +68,22 @@ public class ACRenderer {
             }, new int[] { // indices
                     0, 1, 2, 0, 2, 3
             });
-            shaderGeneric = (ACShader) ACFileUtils.getAsset("arcane.shader.generic");
-            shaderColorable = (ACShader) ACFileUtils.getAsset("arcane.shader.colorable");
+
+            final String[] shadersToLoad = new String[] {
+                    "arcane.shader.generic",
+                    "arcane.shader.colorable",
+                    "arcane.shader.texture_cutout"
+            };
+
+            for (String shader : shadersToLoad) {
+
+                shaders.put(shader, (ACShader) ACFileUtils.getAsset(shader));
+            }
         });
+    }
+
+    private ACShader getShader(String assetName) {
+        return shaders.get(assetName);
     }
 
     public void handleDrawQueue() {
@@ -82,9 +96,14 @@ public class ACRenderer {
             // like how does that even happen
             for (ACDrawRequest request : drawQueue) {
                 switch (request.type) {
-                    case RECT -> handleDrawRect(request.position, request.size,
+                    case RECT -> handleDrawRect(getProjection(),
+                                                request.position, request.size,
                                                 request.color, request.fill,
-                                                shaderColorable);
+                                                getShader("arcane.shader.colorable"));
+                    case TEXTURE -> handleDrawTextureRect(getProjection(),
+                                                          request.position, request.size,
+                                                          request.texture,
+                                                          getShader("arcane.shader.texture_cutout"));
                 }
                 handled.add(request);
             }
@@ -181,14 +200,6 @@ public class ACRenderer {
 
     }
 
-    public Rectangled getScreenBounds() {
-        double ratio = (double) window.getWidth() / window.getHeight();
-        double scale = 0.5;
-        return new Rectangled(-ratio * scale, -scale, ratio * scale, scale)
-                .translate(translation)
-                .scale(1/this.scale.x, 1/this.scale.y);
-    }
-
     public void drawRect(double posX, double posY, double sizeX, double sizeY) {
         drawRect(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY));
     }
@@ -210,12 +221,6 @@ public class ACRenderer {
     }
 
     public void drawRect(Vector3d position, Vector2d size) {
-//        Rectangled toDraw = new Rectangled(new Vector2d(-position.x, -position.y),
-//                                           new Vector2d(size).add(-position.x, -position.y));
-//        if (!toDraw.intersectsRectangle(getScreenBounds())) {
-//            return;
-//        }
-
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.RECT);
         request.position = new Vector3d().set(position);
         request.size = new Vector2d().set(size);
@@ -225,7 +230,25 @@ public class ACRenderer {
         }
     }
 
-    private void handleDrawRect(Vector3d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
+    public void drawTexture(ACTexture texture, Vector2d position, Vector2d size) {
+        drawTexture(texture, new Vector3d(position, 0), size);
+    }
+
+    public void drawTexture(ACTexture texture, Vector2d position, Vector2d size, double depth) {
+        drawTexture(texture, new Vector3d(position, depth), size);
+    }
+
+    public void drawTexture(ACTexture texture, Vector3d position, Vector2d size) {
+        ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.TEXTURE);
+        request.position = new Vector3d().set(position);
+        request.size = new Vector2d().set(size);
+        request.texture = texture;
+        synchronized (drawQueue) {
+            drawQueue.add(request);
+        }
+    }
+
+    private void handleDrawRect(Matrix4d projection, Vector3d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
 
         if (quad == null || !quad.registered()
                 || shader == null || !shader.registered()) {
@@ -245,11 +268,11 @@ public class ACRenderer {
 
         glUseProgram(shader.programID);
         shader.setUniform("transform", transform);
-        shader.setUniform("projection", getProjection());
+        shader.setUniform("projection", projection);
         shader.setUniform("camera", getTransform());
 
         shader.setUniform("color", color);
-        
+
         glDrawElements(GL_TRIANGLES, quad.indices.length, GL_UNSIGNED_INT, 0);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -264,11 +287,54 @@ public class ACRenderer {
         }
     }
 
+    private void handleDrawTextureRect(Matrix4d projection, Vector3d position, Vector2d size, ACTexture texture, ACShader shader) {
 
-    public void drawTexture(ACTexture texture, Vector2d position) {
+        if (quad == null || !quad.registered()
+                || shader == null || !shader.registered()
+                || texture == null || !texture.registered()) {
+            // silently fail instead of crashing
+            return;
+        }
 
-    }
-    public void drawTexture(ACTexture texture, Vector2d position, Vector2d size) {
+        texture.setFilter(GL_NEAREST);
+
+        ACThreadManager.throwIfNotMainThread();
+
+        Matrix4d transform = ACMath.getTransform(position, size);
+
+        glBindVertexArray(quad.vao);
+
+        glEnableVertexAttribArray(0); // position
+        glEnableVertexAttribArray(1); // texturecoords
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad.indexBuffer);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture.getID());
+
+        glUseProgram(shader.programID);
+        shader.setUniform("transform", transform);
+        shader.setUniform("projection", projection);
+        shader.setUniform("camera", getTransform());
+
+        shader.setUniform("sampler", 0);
+
+        glDrawElements(GL_TRIANGLES, quad.indices.length, GL_UNSIGNED_INT, 0);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glBindVertexArray(0);
+
+        glUseProgram(0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        int err = glGetError();
+        if (err != 0) {
+            ACLogger.log(ACLevel.ERROR, err);
+        }
 
     }
 

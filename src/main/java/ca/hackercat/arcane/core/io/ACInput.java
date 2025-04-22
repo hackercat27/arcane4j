@@ -43,7 +43,7 @@ public class ACInput {
                 for (Bind bind : binds) {
                     if (bind.keyNum == code) {
                         if (action == GLFW_PRESS) {
-                            bind.lastPressed = tick;
+                            bind.lastPressed = tick + 1;
                         }
                         if (action == GLFW_RELEASE) {
                             bind.lastReleased = tick;

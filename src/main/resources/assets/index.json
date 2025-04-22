@@ -24,6 +24,12 @@
       ]
     },
     {
+      "type": "shader",
+      "name": "arcane.shader.texture_cutout",
+      "fragment": "res:/assets/arcane/shaders/core/texture_cutout.fsh",
+      "vertex": "res:/assets/arcane/shaders/core/texture_cutout.vsh"
+    },
+    {
       "type": "jdict",
       "name": "arcane.lang.en_us",
       "path": "res:/assets/arcane//lang/en_us.json"
