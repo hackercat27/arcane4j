@@ -1,6 +1,4 @@
-package ca.hackercat.arcane.engine;
-
-import ca.hackercat.arcane.core.ACRenderer;
+package ca.hackercat.arcane.core;
 
 public interface ACGameManager {
 

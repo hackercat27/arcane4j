@@ -1,7 +1,6 @@
 package ca.hackercat.arcane.entity;
 
 import ca.hackercat.arcane.core.ACRenderer;
-import ca.hackercat.arcane.core.ACThreadManager;
 import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
 import ca.hackercat.arcane.logging.ACLevel;
