@@ -3,8 +3,8 @@
     {
       "type": "shader",
       "name": "arcane.shader.generic",
-      "fragment": "res:/shaders/core/generic.fsh",
-      "vertex": "res:/shaders/core/generic.vsh",
+      "fragment": "res:/assets/arcane/shaders/core/generic.fsh",
+      "vertex": "res:/assets/arcane/shaders/core/generic.vsh",
       "uniforms": [
         "mat4,transform,transform",
         "mat4,camera,camera_transform",
@@ -14,8 +14,8 @@
     {
       "type": "shader",
       "name": "arcane.shader.colorable",
-      "fragment": "res:/shaders/core/colorable.fsh",
-      "vertex": "res:/shaders/core/colorable.vsh",
+      "fragment": "res:/assets/arcane/shaders/core/colorable.fsh",
+      "vertex": "res:/assets/arcane/shaders/core/colorable.vsh",
       "uniforms": [
         "mat4,transform,generic.transform_matrix",
         "mat4,camera,generic.camera_transform_matrix",
@@ -26,7 +26,7 @@
     {
       "type": "jdict",
       "name": "arcane.lang.en_us",
-      "path": "res:/lang/en_us.json"
+      "path": "res:/assets/arcane//lang/en_us.json"
     }
   ]
 }

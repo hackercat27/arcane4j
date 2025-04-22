@@ -1,6 +1,7 @@
 package ca.hackercat.arcane.core.io;
 
 import ca.hackercat.arcane.core.ACThreadManager;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.*;
@@ -119,7 +120,7 @@ public class ACInput {
         synchronized (binds) {
             binds.add(bind);
         }
-        ACLogger.log("Added bind '%s' to key '%s'", action, keyName);
+        ACLogger.log(ACLevel.INFO, "Added bind '%s' to key '%s'", action, keyName);
     }
 
     public static boolean isActionHeld(String action) {
@@ -185,7 +186,7 @@ public class ACInput {
             }
         }
 
-        ACLogger.error("Couldn't find key %s", keyName);
+        ACLogger.log(ACLevel.ERROR, "Couldn't find key %s", keyName);
         return -1;
     }
 

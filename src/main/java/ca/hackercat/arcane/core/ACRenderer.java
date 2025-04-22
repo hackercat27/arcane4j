@@ -6,6 +6,7 @@ import ca.hackercat.arcane.core.asset.ACTexture;
 import ca.hackercat.arcane.core.io.ACFileUtils;
 import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.entity.ACEntity;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACMath;
 import org.joml.Matrix4d;
@@ -92,6 +93,14 @@ public class ACRenderer {
         }
     }
 
+    public void setColor(double r, double g, double b) {
+        this.color.set(r, g, b);
+    }
+
+    public void setColor(double r, double g, double b, double a) {
+        this.color.set(r, g, b, a);
+    }
+
     public void setColor(Color color) {
         this.color.set(color.getRed() / 255d,
                        color.getGreen() / 255d,
@@ -111,16 +120,32 @@ public class ACRenderer {
         this.translation.set(translation);
     }
 
+    public void setTranslation(double x, double y) {
+        translation.set(x, y);
+    }
+
     public void translate(Vector2d translation) {
         this.translation.add(translation);
+    }
+
+    public void translate(double x, double y) {
+        translation.add(x, y);
     }
 
     public void setScale(Vector2d scale) {
         this.scale.set(scale);
     }
 
+    public void setScale(double x, double y) {
+        scale.set(x, y);
+    }
+
     public void scale(Vector2d scale) {
         this.scale.mul(scale);
+    }
+
+    public void scale(double x, double y) {
+        scale.mul(x, y);
     }
 
     public void setTransform(Matrix4d transform) {
@@ -162,6 +187,10 @@ public class ACRenderer {
         return new Rectangled(-ratio * scale, -scale, ratio * scale, scale)
                 .translate(translation)
                 .scale(1/this.scale.x, 1/this.scale.y);
+    }
+
+    public void drawRect(double posX, double posY, double sizeX, double sizeY) {
+        drawRect(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY));
     }
 
     public void drawRect(Vector2d position, Vector2d size) {
@@ -231,7 +260,7 @@ public class ACRenderer {
 
         int err = glGetError();
         if (err != 0) {
-            ACLogger.error(err);
+            ACLogger.log(ACLevel.ERROR, err);
         }
     }
 

@@ -1,14 +1,8 @@
 package ca.hackercat.arcane.logging;
 
+import java.io.PrintStream;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
-
-import java.io.PrintStream;
-
-import static org.fusesource.jansi.Ansi.*;
-import static org.fusesource.jansi.Ansi.Color.*;
 
 public class ACLogger {
 
@@ -17,44 +11,17 @@ public class ACLogger {
     public static final PrintStream out;
 
     static {
-        AnsiConsole.systemInstall();
         out = System.out;
         warn = System.out;
         err = System.out;
     }
 
-    public enum Level {
-        INFO(BLUE),
-        WARN(YELLOW),
-        ERROR(RED);
-        public final Ansi.Color color;
-        Level(Ansi.Color color) {
-            this.color = color;
-        }
+    public static void log(ACLevel level, String message, Object... args) {
+        log(level, String.format(message, args));
     }
 
-    public static void error(Object o) {
-        write(Level.ERROR, String.valueOf(o));
-    }
-
-    public static void error(String message, Object... args) {
-        error(String.format(message, args));
-    }
-
-    public static void warn(Object o) {
-        write(Level.WARN, String.valueOf(o));
-    }
-
-    public static void warn(String message, Object... args) {
-        warn(String.format(message, args));
-    }
-
-    public static void log(Object o) {
-        write(Level.INFO, String.valueOf(o));
-    }
-
-    public static void log(String message, Object... args) {
-        log(String.format(message, args));
+    public static void log(ACLevel level, Object o) {
+        write(level, String.valueOf(o));
     }
 
     private static String getTime() {
@@ -63,14 +30,33 @@ public class ACLogger {
         return time.format(formatter);
     }
 
-    private static void write(Level level, String message) {
-        out.println(
-                ansi().a(String.format("[%s] [%s/", getTime(), Thread.currentThread().getName()))
-                      .fg(level.color)
-                      .a(level.name())
-                      .reset()
-                      .a("]: ")
-                      .a(message));
-    }
+    private static void write(ACLevel level, String message) {
 
+        ACLevel minLevel;
+        try {
+
+            String p = System.getProperty("hackercat.logging.level");
+
+            if (p == null) {
+                throw new IllegalArgumentException("Property not set");
+            }
+
+            minLevel = ACLevel.valueOf(p.toUpperCase());
+        }
+        catch (IllegalArgumentException ignored) {
+            minLevel = ACLevel.INFO; // default to just info
+        }
+
+        PrintStream stream = switch (level) {
+            case ACLevel.ERROR -> err;
+            case ACLevel.WARN -> warn;
+            default -> out;
+        };
+
+        if (level.getPriority() < minLevel.getPriority()) {
+            return;
+        }
+
+        stream.printf("[%s] [%s/%s]: %s\n", getTime(), Thread.currentThread().getName(), level.name(), message);
+    }
 }

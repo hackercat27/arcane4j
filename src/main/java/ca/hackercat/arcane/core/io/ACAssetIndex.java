@@ -2,7 +2,9 @@ package ca.hackercat.arcane.core.io;
 
 import ca.hackercat.arcane.core.asset.ACAsset;
 import ca.hackercat.arcane.core.asset.ACShader;
+import ca.hackercat.arcane.core.asset.ACTexture;
 import ca.hackercat.arcane.core.io.ACFileUtils.FileType;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 
 import java.util.HashMap;
@@ -34,7 +36,7 @@ public class ACAssetIndex {
             return cache.get(name);
         }
 
-        ACLogger.log("Loading asset '%s' from disk", name);
+        ACLogger.log(ACLevel.VERBOSE, "Loading asset '%s' from disk", name);
 
         for (Element element : elements) {
             if (element.name.equals(name)) {
@@ -51,6 +53,8 @@ public class ACAssetIndex {
                             asset = new ACShader(element.name,
                                                  element.vertex,
                                                  element.fragment);
+                    case TEXTURE ->
+                            asset = new ACTexture(ACFileUtils.getInputStream(element.path));
                 }
 
                 if (asset == null) {

@@ -1,5 +1,6 @@
 package ca.hackercat.arcane.core;
 
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACStringUtils;
 
@@ -133,7 +134,7 @@ public class ACThreadManager {
         Thread current = Thread.currentThread();
         String threadName = current.getName();
         if (!threadName.matches("main")) {
-            ACLogger.warn("Setting thread '%s' as 'main' thread, will likely cause problems", threadName);
+            ACLogger.log(ACLevel.WARN, "Setting thread '%s' as 'main' thread, will likely cause problems", threadName);
         }
         mainThread = current;
     }

@@ -1,6 +1,7 @@
 package ca.hackercat.arcane.core.asset;
 
 import ca.hackercat.arcane.core.io.ACFileUtils;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Matrix4d;
 import org.joml.Matrix4f;
@@ -103,16 +104,16 @@ public class ACShader implements ACAsset {
         glCompileShader(this.vertexID);
 
         if (glGetShaderi(this.vertexID, GL_COMPILE_STATUS) == GL_FALSE) {
-            ACLogger.error(this.vertexPath + " couldn't compile\n"
-                                   + glGetShaderInfoLog(this.vertexID));
+            ACLogger.log(ACLevel.WARN, this.vertexPath + " couldn't compile\n"
+                    + glGetShaderInfoLog(this.vertexID));
         }
 
         this.fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(this.fragmentID, fragmentSource);
         glCompileShader(this.fragmentID);
         if (glGetShaderi(this.fragmentID, GL_COMPILE_STATUS) == GL_FALSE) {
-            ACLogger.error(this.fragmentPath + " couldn't compile\n"
-                                   + glGetShaderInfoLog(this.fragmentID));
+            ACLogger.log(ACLevel.WARN, this.fragmentPath + " couldn't compile\n"
+                    + glGetShaderInfoLog(this.fragmentID));
         }
 
         glAttachShader(this.programID, this.vertexID);
@@ -120,13 +121,13 @@ public class ACShader implements ACAsset {
 
         glLinkProgram(this.programID);
         if (glGetProgrami(this.programID, GL_LINK_STATUS) == GL_FALSE) {
-            ACLogger.error("Shader " + this.name + " initialization error - Couldn't link program\n"
-                                   + glGetProgramInfoLog(this.programID));
+            ACLogger.log(ACLevel.WARN, "Shader " + this.name + " initialization error - Couldn't link program\n"
+                    + glGetProgramInfoLog(this.programID));
             error |= ERROR_LINK_BIT;
         }
         glValidateProgram(this.programID);
         if (glGetProgrami(this.programID, GL_VALIDATE_STATUS) == GL_FALSE) {
-            ACLogger.error("Shader " + this.name + " initialization error Program is invalid\n"
+            ACLogger.log(ACLevel.WARN, "Shader " + this.name + " initialization error Program is invalid\n"
                                    + glGetProgramInfoLog(this.programID));
             error |= ERROR_INVALID_PROGRAM_BIT;
         }

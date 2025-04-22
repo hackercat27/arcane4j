@@ -4,6 +4,7 @@ import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.core.ACThreadManager;
 import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
 
@@ -40,7 +41,7 @@ public class ACEntity {
             return this;
         }
         if (hasComponentOfType(component.getClass())) {
-            ACLogger.error("Entity already has component '%s'", component.getClass().getTypeName());
+            ACLogger.log(ACLevel.ERROR, "Entity already has component '%s'", component.getClass().getTypeName());
             return this;
         }
         synchronized (this.components) {

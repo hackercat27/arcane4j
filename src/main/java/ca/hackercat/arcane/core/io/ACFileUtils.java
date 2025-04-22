@@ -2,6 +2,7 @@ package ca.hackercat.arcane.core.io;
 
 import ca.hackercat.arcane.core.ACThreadManager;
 import ca.hackercat.arcane.core.asset.ACAsset;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import com.google.gson.Gson;
 
@@ -16,7 +17,7 @@ public class ACFileUtils {
 
     public enum Directive {
         FILE("file:", ""),
-        RESOURCE("res:", "assets");
+        RESOURCE("res:", "");
 
         private final String value;
         private final String expansion;
@@ -75,7 +76,7 @@ public class ACFileUtils {
     private static final List<ACAssetIndex> indices = new ArrayList<>();
 
     static {
-        registerIndex("res:/index.json");
+        registerIndex("res:/assets/index.json");
     }
 
     public static String simplifyPath(String path) {
@@ -156,7 +157,7 @@ public class ACFileUtils {
 
         String simplePath = simplifyPath(path);
 
-        InputStream in = ACFileUtils.class.getResourceAsStream("/"+simplePath);
+        InputStream in = ACFileUtils.class.getResourceAsStream(simplePath);
         if (in == null) {
             try {
                 in = new FileInputStream(simplePath);
@@ -166,7 +167,7 @@ public class ACFileUtils {
 
         // if the inputstream is STILL null, then that means we didn't find anything.
         if (in == null) {
-            ACLogger.warn("Couldn't find file '%s'", simplePath);
+            ACLogger.log(ACLevel.WARN, "Couldn't find file '%s'", simplePath);
         }
         return in;
     }
@@ -175,10 +176,26 @@ public class ACFileUtils {
         // CAN NOT call on main thread because it'll lock up if true
         ACThreadManager.throwIfMainThread();
 
-        for (ACAssetIndex index : indices) {
-            ACAsset asset = index.getAsset(name);
-            if (asset != null) {
-                return asset;
+        synchronized (indices) {
+            while (indices.isEmpty()) {
+                ACLogger.log(ACLevel.WARN, "no index files registered!");
+                try {
+                    indices.wait();
+                }
+                catch (InterruptedException ignored) {
+                    ACLogger.log(ACLevel.VERBOSE, "Thread interrupted while waiting for asset index");
+                }
+            }
+
+            for (ACAssetIndex index : indices) {
+                if (index == null) {
+                    continue;
+                }
+                ACLogger.log(ACLevel.VERBOSE, "Checking index for " + name);
+                ACAsset asset = index.getAsset(name);
+                if (asset != null) {
+                    return asset;
+                }
             }
         }
 
@@ -186,7 +203,11 @@ public class ACFileUtils {
     }
 
     public static void registerIndex(String path) {
-        indices.add(fromJson(ACAssetIndex.class, readStringFromPath(path)));
+        synchronized (indices) {
+            indices.add(fromJson(ACAssetIndex.class, readStringFromPath(path)));
+            ACLogger.log(ACLevel.VERBOSE, "Registered file index %s", path);
+            indices.notify();
+        }
     }
 
     public static <T> T fromJson(Class<T> clazz, String json) {

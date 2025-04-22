@@ -3,7 +3,7 @@ package ca.hackercat.arcane.core;
 import ca.hackercat.arcane.core.asset.ACAssetManager;
 import ca.hackercat.arcane.core.io.ACInput;
 import ca.hackercat.arcane.core.io.ACWindow;
-import ca.hackercat.arcane.engine.ACGameManager;
+import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACGenericManager;
 import org.lwjgl.glfw.*;
@@ -45,19 +45,19 @@ public class ACWindowManager {
 
         ACThreadManager.setMainThread();
 
-        ACLogger.log("Initializing GLFW");
+        ACLogger.log(ACLevel.VERBOSE, "Initializing GLFW");
 
         if (!glfwInit()) {
-            ACLogger.error("Failed to initialize GLFW");
+            ACLogger.log(ACLevel.FATAL, "Failed to initialize GLFW");
             return -1;
         }
 
-        ACLogger.log("Initialized GLFW");
+        ACLogger.log(ACLevel.VERBOSE, "Initialized GLFW");
 
         windowPtr = glfwCreateWindow(initialWidth, initialHeight, "Arcane", 0, 0);
 
         if (windowPtr == 0) {
-            ACLogger.error("Failed to create window!");
+            ACLogger.log(ACLevel.FATAL, "Failed to create window!");
             return -1;
         }
 
@@ -94,7 +94,7 @@ public class ACWindowManager {
                 catch (InterruptedException ignored) {}
                 lastUpdateDurationNanos = System.nanoTime() - start;
             }
-            ACLogger.log("Update thread exited");
+            ACLogger.log(ACLevel.INFO, "Update thread exited");
         }, "arcane-update");
 
         glEnable(GL_DEPTH_TEST);
@@ -132,7 +132,7 @@ public class ACWindowManager {
         glfwDestroyWindow(windowPtr);
         glfwTerminate();
 
-        ACLogger.log("Released system resources");
+        ACLogger.log(ACLevel.VERBOSE, "Released system resources");
 
         return 0;
     }
