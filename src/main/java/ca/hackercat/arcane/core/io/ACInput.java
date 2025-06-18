@@ -43,7 +43,7 @@ public class ACInput {
                 for (Bind bind : binds) {
                     if (bind.keyNum == code) {
                         if (action == GLFW_PRESS) {
-                            bind.lastPressed = tick + 1;
+                            bind.lastPressed = tick;
                         }
                         if (action == GLFW_RELEASE) {
                             bind.lastReleased = tick;
@@ -136,7 +136,7 @@ public class ACInput {
         if (bind == null) {
             return false;
         }
-        return bind.lastPressed == tick;
+        return bind.lastPressed == tick - 1;
     }
 
     public static boolean isActionJustReleased(String action) {
@@ -144,7 +144,7 @@ public class ACInput {
         if (bind == null) {
             return false;
         }
-        return bind.lastReleased == tick;
+        return bind.lastReleased == tick - 1;
     }
 
     private static Bind getBindByName(String action) {

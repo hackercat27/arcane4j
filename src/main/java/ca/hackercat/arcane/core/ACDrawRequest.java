@@ -9,6 +9,7 @@ public class ACDrawRequest {
 
     public enum Type {
         RECT,
+        OVAL,
         TEXTURE
     }
 

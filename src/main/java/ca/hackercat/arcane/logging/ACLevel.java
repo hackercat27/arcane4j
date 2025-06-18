@@ -1,6 +1,8 @@
 package ca.hackercat.arcane.logging;
 
 public enum ACLevel {
+    /** Extremely verbose logging. Probably shouldn't be enabled in a release build.*/
+    DEBUG(-2),
     /** Verbose logging, for informal debugging and log spam.*/
     VERBOSE(-1),
     /** Standard logging, for normal application info.*/

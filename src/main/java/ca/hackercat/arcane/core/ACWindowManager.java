@@ -17,7 +17,7 @@ public class ACWindowManager {
     private long windowPtr;
     private boolean closeRequested;
 
-    private double targetTPS = 64;
+    private double targetTPS = 66;
 
     private long lastUpdateTimestampNanos;
     private long lastUpdateDurationNanos;

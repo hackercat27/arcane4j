@@ -13,11 +13,12 @@ public class ACCameraControllerComponent implements ACComponent {
 
     @Override
     public void update(ACEntity parent, double deltaTime) {
-        Vector2d pos = parent.getPosition();
-        Vector2d targetPos = tracked.getPosition().add(0.5, 0.5);
+        Vector2d pos = parent.getPositionI();
+        Vector2d targetPos = tracked.getPositionI().add(0.5, 0.5);
 
         Vector2d delta = targetPos.sub(pos, new Vector2d());
 
-        parent.setPosition(targetPos.sub(delta.mul(0.9995)));
+        // TODO: this doesn't respect deltaTime
+        parent.setPosition(targetPos.sub(delta.mul(0.998)));
     }
 }

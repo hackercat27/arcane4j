@@ -8,8 +8,6 @@ public class ACCollisionBody {
     public ACCollisionType type;
     public Rectangled hull;
 
-    private Vector2d translation = new Vector2d();
-
     public ACCollisionBody(ACCollisionType type, Rectangled hull) {
         this.type = type;
         this.hull = hull;
@@ -23,12 +21,10 @@ public class ACCollisionBody {
         if (other == null || hull == null || other.hull == null) {
             return false;
         }
-        Rectangled thisHull = new Rectangled(hull);
-        thisHull.translate(translation);
-        return thisHull.intersectsRectangle(other.hull);
+        return hull.intersectsRectangle(other.hull);
     }
 
-    public void setTranslation(Vector2d translation) {
-        this.translation.set(translation);
+    public void translate(Vector2d translation) {
+        hull.translate(new Vector2d().sub(translation));
     }
 }

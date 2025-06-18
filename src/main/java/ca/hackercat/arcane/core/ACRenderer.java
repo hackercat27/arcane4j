@@ -98,7 +98,11 @@ public class ACRenderer {
                 switch (request.type) {
                     case RECT -> handleDrawRect(getProjection(),
                                                 request.position, request.size,
-                                                request.color, request.fill,
+                                                request.color, request.fill, 0,
+                                                getShader("arcane.shader.colorable"));
+                    case OVAL -> handleDrawRect(getProjection(),
+                                                request.position, request.size,
+                                                request.color, request.fill, 1,
                                                 getShader("arcane.shader.colorable"));
                     case TEXTURE -> handleDrawTextureRect(getProjection(),
                                                           request.position, request.size,
@@ -230,6 +234,36 @@ public class ACRenderer {
         }
     }
 
+    public void drawOval(double posX, double posY, double sizeX, double sizeY) {
+        drawOval(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY));
+    }
+
+    public void drawOval(Vector2d position, Vector2d size) {
+        drawOval(position, size, 0);
+    }
+
+    public void drawOval(Rectangled rect) {
+        drawOval(rect, 0);
+    }
+
+    public void drawOval(Rectangled rect, double depth) {
+        drawOval(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth);
+    }
+
+    public void drawOval(Vector2d position, Vector2d size, double depth) {
+        drawOval(new Vector3d(position, depth), size);
+    }
+
+    public void drawOval(Vector3d position, Vector2d size) {
+        ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.OVAL);
+        request.position = new Vector3d().set(position);
+        request.size = new Vector2d().set(size);
+        request.color = new Vector4d().set(this.color);
+        synchronized (drawQueue) {
+            drawQueue.add(request);
+        }
+    }
+
     public void drawTexture(ACTexture texture, Vector2d position, Vector2d size) {
         drawTexture(texture, new Vector3d(position, 0), size);
     }
@@ -248,7 +282,7 @@ public class ACRenderer {
         }
     }
 
-    private void handleDrawRect(Matrix4d projection, Vector3d position, Vector2d size, Vector4d color, boolean fill, ACShader shader) {
+    private void handleDrawRect(Matrix4d projection, Vector3d position, Vector2d size, Vector4d color, boolean fill, double cornerRadius, ACShader shader) {
 
         if (quad == null || !quad.registered()
                 || shader == null || !shader.registered()) {
@@ -262,7 +296,11 @@ public class ACRenderer {
 
         glBindVertexArray(quad.vao);
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glEnableVertexAttribArray(0); // position
+        glEnableVertexAttribArray(1); // uvs
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad.indexBuffer);
 
@@ -272,11 +310,13 @@ public class ACRenderer {
         shader.setUniform("camera", getTransform());
 
         shader.setUniform("color", color);
+        shader.setUniform("cornerRadius", cornerRadius);
 
         glDrawElements(GL_TRIANGLES, quad.indices.length, GL_UNSIGNED_INT, 0);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
         glBindVertexArray(0);
 
         glUseProgram(0);

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ACEntity {
 
-    private static Vector2d gravity = new Vector2d(0, 0);
+    private static Vector2d gravity = new Vector2d(0, -72);
 
     private Vector2d position = new Vector2d();
     private Vector2d lastPosition = new Vector2d();
@@ -105,15 +105,23 @@ public class ACEntity {
         return new Vector2d(gravity);
     }
 
-    public Vector2d getPosition() {
+    public Vector2d getPositionI() {
         return position.get(new Vector2d());
     }
 
-    public Vector2d getPosition(double interp) {
-        return new Vector2d(lastPosition).lerp(position, interp);
+    public Vector2d getPosition() {
+        return position;
     }
 
     public Vector2d getVelocity() {
+        return velocity;
+    }
+
+    public Vector2d getPositionI(double interp) {
+        return new Vector2d(lastPosition).lerp(position, interp);
+    }
+
+    public Vector2d getVelocityI() {
         return velocity.get(new Vector2d());
     }
 
