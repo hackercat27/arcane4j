@@ -15,9 +15,12 @@ void main()
     vec2 d = abs(p) - corner;
     float dist = length(max(d, 0.0)) - out_CornerRadius;
 
-    float aa = fwidth(dist);
-    float alpha = 1.0 - smoothstep(0.0, aa, dist);
-
-
-    fragColor = vec4(out_Color.rgb, out_Color.a * alpha);
+    if (dist > 0.0) {
+        discard;
+    }
+    fragColor = out_Color;
+//    float aa = fwidth(dist);
+//    float alpha = 1.0 - smoothstep(0.0, aa, dist);
+//
+//    fragColor = vec4(out_Color.rgb, out_Color.a * alpha);
 }
