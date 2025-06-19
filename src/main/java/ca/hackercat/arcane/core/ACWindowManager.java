@@ -54,6 +54,14 @@ public class ACWindowManager {
 
         ACLogger.log(ACLevel.VERBOSE, "Initialized GLFW");
 
+        glfwWindowHint(GLFW_RED_BITS, 8);
+        glfwWindowHint(GLFW_GREEN_BITS, 8);
+        glfwWindowHint(GLFW_BLUE_BITS, 8);
+        glfwWindowHint(GLFW_ALPHA_BITS, 8);
+        glfwWindowHint(GLFW_DEPTH_BITS, 24);
+        glfwWindowHint(GLFW_STENCIL_BITS, 8);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
         windowPtr = glfwCreateWindow(initialWidth, initialHeight, "Arcane", 0, 0);
 
         if (windowPtr == 0) {
