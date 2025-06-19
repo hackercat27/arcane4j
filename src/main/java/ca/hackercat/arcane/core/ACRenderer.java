@@ -89,7 +89,6 @@ public class ACRenderer {
     public void handleDrawQueue() {
         ACThreadManager.throwIfNotMainThread();
 
-        List<ACDrawRequest> handled = new LinkedList<>();
         synchronized (drawQueue) {
             // somehow i was never clearing these and never noticed
             // and i literally just thought the depth buffer was never getting cleared
@@ -109,9 +108,8 @@ public class ACRenderer {
                                                           request.texture,
                                                           getShader("arcane.shader.texture_cutout"));
                 }
-                handled.add(request);
             }
-            drawQueue.removeAll(handled);
+            drawQueue.clear();
 
         }
     }
