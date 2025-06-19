@@ -6,6 +6,8 @@ import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACGenericManager;
+import java.nio.IntBuffer;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
@@ -73,7 +75,6 @@ public class ACWindowManager {
 
         glfwMakeContextCurrent(windowPtr);
         glfwSwapInterval(1);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwShowWindow(windowPtr);
 
         GLCapabilities capabilities = GL.createCapabilities();
