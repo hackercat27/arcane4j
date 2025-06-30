@@ -67,7 +67,7 @@ public class ACThreadManager {
     public static Thread execute(Runnable runnable, String name) {
         Thread t;
         synchronized (threads) {
-            int id = 1;
+            int id = getFirstAvailableID();
             t = new Thread(runnable, ACStringUtils.resolve(name, String.format("custom.thread_id=%d", id)));
             ACThread threadStruct = new ACThread(t, id);
             threads.add(threadStruct);

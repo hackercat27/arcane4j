@@ -23,7 +23,7 @@ public class ACActorPhysicsComponent implements ACComponent {
     public void update(ACEntity parent, double deltaTime) {
 
         if (experiencesGravity && !parent.onGround()) {
-            parent.setVelocity(parent.getVelocityI().add(ACEntity.getGravity().mul(deltaTime)));
+            parent.setVelocity(parent.getVelocityCopy().add(ACEntity.getGravity().mul(deltaTime)));
         }
 
         foundCollisionThisTick = false;
@@ -37,7 +37,7 @@ public class ACActorPhysicsComponent implements ACComponent {
     }
 
     private void updateSolidColliion(ACEntity parent, ACCollisionBody body, double deltaTime) {
-        Vector2d p = parent.getPositionI();
+        Vector2d p = parent.getPositionCopy();
 
         final double GROUND_EPSILON = 0.1;
 
@@ -45,7 +45,7 @@ public class ACActorPhysicsComponent implements ACComponent {
             return;
         }
 
-        Vector2d velocity = parent.getVelocityI();
+        Vector2d velocity = parent.getVelocityCopy();
 
         ACCollisionBody parentBody = new ACCollisionBody(ACCollisionType.ENTITY, new Rectangled(0, 0, 1, 1));
         parentBody.translate(p);

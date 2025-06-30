@@ -1,10 +1,12 @@
 package ca.hackercat.arcane.entity;
 
+import ca.hackercat.arcane.core.ACGameManager;
 import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
 import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
+import ca.hackercat.arcane.util.ACMath;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
@@ -17,19 +19,21 @@ public class ACEntity {
     private Vector2d position = new Vector2d();
     private Vector2d lastPosition = new Vector2d();
     private Vector2d velocity = new Vector2d();
+    private double rotation;
+    private double lastRotation;
 
     private ACCollisionBody body = new ACCollisionBody();
 
-    private ACTeam team;
-
     private final List<ACComponent> components = new ArrayList<>();
 
-    public ACEntity(ACTeam team) {
-        this.team = team;
+    private final ACGameManager gameManager;
+
+    public ACEntity(ACGameManager gameManager) {
+        this.gameManager = gameManager;
     }
 
-    public ACEntity(ACTeam team, ACComponent... components) {
-        this.team = team;
+    public ACEntity(ACGameManager gameManager, ACComponent... components) {
+        this.gameManager = gameManager;
         synchronized (this.components) {
             this.components.addAll(List.of(components));
         }
@@ -49,11 +53,11 @@ public class ACEntity {
         return this;
     }
 
-    public <T> boolean hasComponentOfType(Class<T> clazz) {
+    public boolean hasComponentOfType(Class<? extends ACComponent> clazz) {
         return getComponentOfType(clazz) != null;
     }
 
-    public <T> ACComponent getComponentOfType(Class<T> clazz) {
+    public ACComponent getComponentOfType(Class<? extends ACComponent> clazz) {
         synchronized (this.components) {
             for (ACComponent component : components) {
                 if (component.getClass() == clazz) {
@@ -65,6 +69,7 @@ public class ACEntity {
     }
 
     public void update(double deltaTime) {
+        lastRotation = rotation;
         lastPosition.set(position);
         position.add(new Vector2d(velocity).mul(deltaTime));
         synchronized (components) {
@@ -105,7 +110,7 @@ public class ACEntity {
         return new Vector2d(gravity);
     }
 
-    public Vector2d getPositionI() {
+    public Vector2d getPositionCopy() {
         return position.get(new Vector2d());
     }
 
@@ -117,16 +122,23 @@ public class ACEntity {
         return velocity;
     }
 
-    public Vector2d getPositionI(double interp) {
+    public Vector2d getPositionCopyInterpolated(double interp) {
         return new Vector2d(lastPosition).lerp(position, interp);
     }
 
-    public Vector2d getVelocityI() {
+    public Vector2d getVelocityCopy() {
         return velocity.get(new Vector2d());
     }
 
     public ACCollisionBody getBody() {
         return this.body;
+    }
+
+    public Vector2d getOrigin() {
+        if (body.hull == null) {
+            return getPositionCopy();
+        }
+        return new Vector2d((body.hull.minX + body.hull.maxX) / 2, (body.hull.minY + body.hull.maxY) / 2);
     }
 
     public void setPosition(Vector2d position) {
@@ -152,5 +164,21 @@ public class ACEntity {
 
     public void setVelocity(double x, double y) {
         this.velocity.set(x, y);
+    }
+
+    public double getRotation() {
+        return rotation;
+    }
+
+    public double getRotationCopy(double t) {
+        return ACMath.lerpMod(lastRotation, rotation, t, 0, Math.TAU);
+    }
+
+    public void setRotation(double rotation) {
+        this.rotation = ((rotation % Math.TAU) + Math.TAU) % Math.TAU;
+    }
+
+    public ACGameManager getGameManager() {
+        return gameManager;
     }
 }

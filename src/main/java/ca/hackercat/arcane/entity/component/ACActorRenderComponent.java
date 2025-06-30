@@ -11,7 +11,7 @@ public class ACActorRenderComponent implements ACComponent {
     @Override
     public void render(ACEntity parent, ACRenderer r, double t) {
         r.setColor(Color.WHITE);
-        r.drawRect(parent.getPositionI(t), new Vector2d(1, 1));
+        r.drawRect(parent.getPositionCopyInterpolated(t), new Vector2d(1, 1), 0);
     }
 
 }

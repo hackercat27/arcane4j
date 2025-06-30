@@ -58,6 +58,7 @@ public class ACLogger {
         }
 
         String ansi = switch (level) {
+            case ACLevel.DEBUG -> "\u001b[90m";
             case ACLevel.VERBOSE -> "\u001b[90m";
             case ACLevel.WARN -> "\u001b[93m";
             case ACLevel.ERROR -> "\u001b[91m";
@@ -67,5 +68,9 @@ public class ACLogger {
 
         stream.print(ansi);
         stream.printf("[%s] [%s/%s]: %s\n", getTime(), Thread.currentThread().getName(), level.name(), message);
+    }
+
+    public static String exceptionString(Exception e) {
+        return e.getMessage();
     }
 }

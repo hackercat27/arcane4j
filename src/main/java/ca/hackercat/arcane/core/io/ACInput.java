@@ -1,6 +1,8 @@
 package ca.hackercat.arcane.core.io;
 
+import ca.hackercat.arcane.core.ACRenderer;
 import ca.hackercat.arcane.core.ACThreadManager;
+import ca.hackercat.arcane.core.ACWindowManager;
 import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import org.joml.Vector2d;
@@ -32,6 +34,9 @@ public class ACInput {
     private static boolean cursorOnScreen;
 
     private static int tick = 0;
+
+    private static ACWindow window;
+    private static ACRenderer renderer;
 
     private static final List<Bind> binds = new ArrayList<>();
 
@@ -90,12 +95,14 @@ public class ACInput {
         }
     };
 
-    public static void init(long window) {
+    public static void init(long windowPtr, ACWindow window, ACRenderer renderer) {
         ACThreadManager.throwIfNotMainThread();
-        glfwSetKeyCallback(window, keyCallback);
-        glfwSetCursorEnterCallback(window, cursorEnterCallback);
-        glfwSetCursorPosCallback(window, cursorPosCallback);
-        glfwSetMouseButtonCallback(window, mouseButtonCallback);
+        glfwSetKeyCallback(windowPtr, keyCallback);
+        glfwSetCursorEnterCallback(windowPtr, cursorEnterCallback);
+        glfwSetCursorPosCallback(windowPtr, cursorPosCallback);
+        glfwSetMouseButtonCallback(windowPtr, mouseButtonCallback);
+        ACInput.window = window;
+        ACInput.renderer = renderer;
     }
 
     public static void dispose() {
@@ -195,5 +202,13 @@ public class ACInput {
             return null;
         }
         return new Vector2d().set(cursorPos);
+    }
+
+    public static Vector2d getWorldSpaceCursorPos() {
+        if (cursorPos == null || !cursorOnScreen || renderer == null) {
+            return null;
+        }
+
+        return renderer.screenspaceToWorldspace(new Vector2d().set(cursorPos));
     }
 }

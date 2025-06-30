@@ -12,6 +12,7 @@ import ca.hackercat.arcane.util.ACMath;
 import java.util.HashMap;
 import java.util.Map;
 import org.joml.Matrix4d;
+import org.joml.Quaterniond;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 import org.joml.Vector4d;
@@ -35,6 +36,7 @@ public class ACRenderer {
 
     private Vector2d scale = new Vector2d(1, 1);
     private Vector2d translation = new Vector2d();
+    private double rotation;
 
     private final Map<String, ACShader> shaders = new HashMap<>();
 
@@ -95,16 +97,19 @@ public class ACRenderer {
             // like how does that even happen
             for (ACDrawRequest request : drawQueue) {
                 switch (request.type) {
-                    case RECT -> handleDrawRect(getProjection(),
-                                                request.position, request.size,
+                    case RECT -> handleDrawRect(request.projection == null? getProjection() : request.projection,
+                                                request.camera == null? getTransform() : request.camera,
+                                                request.position, request.size, request.rotation,
                                                 request.color, request.fill, 0,
                                                 getShader("arcane.shader.colorable"));
-                    case OVAL -> handleDrawRect(getProjection(),
-                                                request.position, request.size,
+                    case OVAL -> handleDrawRect(request.projection == null? getProjection() : request.projection,
+                                                request.camera == null? getTransform() : request.camera,
+                                                request.position, request.size, request.rotation,
                                                 request.color, request.fill, 1,
                                                 getShader("arcane.shader.colorable"));
-                    case TEXTURE -> handleDrawTextureRect(getProjection(),
-                                                          request.position, request.size,
+                    case TEXTURE -> handleDrawTextureRect(request.projection == null? getProjection() : request.projection,
+                                                          request.camera == null? getTransform() : request.camera,
+                                                          request.position, request.size, request.rotation,
                                                           request.texture,
                                                           getShader("arcane.shader.texture_cutout"));
                 }
@@ -169,11 +174,17 @@ public class ACRenderer {
         scale.mul(x, y);
     }
 
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
+    }
+
     public void setTransform(Matrix4d transform) {
         Vector3d t = transform.getTranslation(new Vector3d());
         Vector3d s = transform.getScale(new Vector3d());
+        Quaterniond rotation = transform.getNormalizedRotation(new Quaterniond());
         setTranslation(new Vector2d(t.x, t.y));
         setScale(new Vector2d(s.x, s.y));
+        setRotation(rotation.getEulerAnglesXYZ(new Vector3d()).z);
     }
 
     public Matrix4d getProjection() {
@@ -181,7 +192,7 @@ public class ACRenderer {
     }
 
     public Matrix4d getTransform() {
-        return ACMath.getTransform(this.translation, this.scale);
+        return ACMath.getCameraTransform(this.translation, this.scale, this.rotation);
     }
 
     public Vector2d screenspaceToWorldspace(Vector2d screenspace) {
@@ -202,61 +213,68 @@ public class ACRenderer {
 
     }
 
-    public void drawRect(double posX, double posY, double sizeX, double sizeY) {
-        drawRect(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY));
+    public void drawRect(double posX, double posY, double sizeX, double sizeY, double rotation) {
+        drawRect(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY), rotation);
     }
 
-    public void drawRect(Vector2d position, Vector2d size) {
-        drawRect(position, size, 0);
+    public void drawRect(Vector2d position, Vector2d size, double rotation) {
+        drawRect(position, size, 0, rotation);
     }
 
-    public void drawRect(Rectangled rect) {
-        drawRect(rect, 0);
+    public void drawRect(Rectangled rect, double rotation) {
+        drawRect(rect, 0, rotation);
     }
 
-    public void drawRect(Rectangled rect, double depth) {
-        drawRect(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth);
+    public void drawRect(Rectangled rect, double depth, double rotation) {
+        drawRect(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth, rotation);
     }
 
-    public void drawRect(Vector2d position, Vector2d size, double depth) {
-        drawRect(new Vector3d(position, depth), size);
+    public void drawRect(Vector2d position, Vector2d size, double depth, double rotation) {
+        drawRect(new Vector3d(position, depth), size, rotation);
     }
 
-    public void drawRect(Vector3d position, Vector2d size) {
+    public void drawRect(Vector3d position, Vector2d size, double rotation) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.RECT);
         request.position = new Vector3d().set(position);
         request.size = new Vector2d().set(size);
         request.color = new Vector4d().set(this.color);
+        request.rotation = rotation;
+        request.camera = new Matrix4d().set(getTransform());
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
-    public void drawOval(double posX, double posY, double sizeX, double sizeY) {
-        drawOval(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY));
+    public void drawOval(double posX, double posY, double sizeX, double sizeY, double rotation) {
+        drawOval(posX, posY, sizeX, sizeY, 0, rotation);
     }
 
-    public void drawOval(Vector2d position, Vector2d size) {
-        drawOval(position, size, 0);
+    public void drawOval(double posX, double posY, double sizeX, double sizeY, double depth, double rotation) {
+        drawOval(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY), depth, rotation);
     }
 
-    public void drawOval(Rectangled rect) {
-        drawOval(rect, 0);
+    public void drawOval(Vector2d position, Vector2d size, double rotation) {
+        drawOval(position, size, 0, rotation);
     }
 
-    public void drawOval(Rectangled rect, double depth) {
-        drawOval(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth);
+    public void drawOval(Rectangled rect, double rotation) {
+        drawOval(rect, 0, rotation);
     }
 
-    public void drawOval(Vector2d position, Vector2d size, double depth) {
-        drawOval(new Vector3d(position, depth), size);
+    public void drawOval(Rectangled rect, double depth, double rotation) {
+        drawOval(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth, rotation);
     }
 
-    public void drawOval(Vector3d position, Vector2d size) {
+    public void drawOval(Vector2d position, Vector2d size, double depth, double rotation) {
+        drawOval(new Vector3d(position, depth), size, rotation);
+    }
+
+    public void drawOval(Vector3d position, Vector2d size, double rotation) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.OVAL);
         request.position = new Vector3d().set(position);
         request.size = new Vector2d().set(size);
         request.color = new Vector4d().set(this.color);
+        request.rotation = rotation;
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
@@ -275,12 +293,15 @@ public class ACRenderer {
         request.position = new Vector3d().set(position);
         request.size = new Vector2d().set(size);
         request.texture = texture;
+        request.rotation = rotation;
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
-    private void handleDrawRect(Matrix4d projection, Vector3d position, Vector2d size, Vector4d color, boolean fill, double cornerRadius, ACShader shader) {
+    private void handleDrawRect(Matrix4d projection, Matrix4d camera,
+                                Vector3d position, Vector2d size, double rotation,
+                                Vector4d color, boolean fill, double cornerRadius, ACShader shader) {
 
         if (quad == null || !quad.registered()
                 || shader == null || !shader.registered()) {
@@ -290,7 +311,7 @@ public class ACRenderer {
 
         ACThreadManager.throwIfNotMainThread();
 
-        Matrix4d transform = ACMath.getTransform(position, size);
+        Matrix4d transform = ACMath.getOBJTransform(position, size, rotation);
 
         glBindVertexArray(quad.vao);
 
@@ -305,7 +326,7 @@ public class ACRenderer {
         glUseProgram(shader.programID);
         shader.setUniform("transform", transform);
         shader.setUniform("projection", projection);
-        shader.setUniform("camera", getTransform());
+        shader.setUniform("camera", camera);
 
         shader.setUniform("color", color);
         shader.setUniform("cornerRadius", cornerRadius);
@@ -325,7 +346,9 @@ public class ACRenderer {
         }
     }
 
-    private void handleDrawTextureRect(Matrix4d projection, Vector3d position, Vector2d size, ACTexture texture, ACShader shader) {
+    private void handleDrawTextureRect(Matrix4d projection, Matrix4d camera,
+                                       Vector3d position, Vector2d size, double rotation,
+                                       ACTexture texture, ACShader shader) {
 
         if (quad == null || !quad.registered()
                 || shader == null || !shader.registered()
@@ -338,9 +361,12 @@ public class ACRenderer {
 
         ACThreadManager.throwIfNotMainThread();
 
-        Matrix4d transform = ACMath.getTransform(position, size);
+        Matrix4d transform = ACMath.getOBJTransform(position, size, rotation);
 
         glBindVertexArray(quad.vao);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glEnableVertexAttribArray(0); // position
         glEnableVertexAttribArray(1); // texturecoords
@@ -353,7 +379,7 @@ public class ACRenderer {
         glUseProgram(shader.programID);
         shader.setUniform("transform", transform);
         shader.setUniform("projection", projection);
-        shader.setUniform("camera", getTransform());
+        shader.setUniform("camera", camera);
 
         shader.setUniform("sampler", 0);
 
@@ -375,5 +401,4 @@ public class ACRenderer {
         }
 
     }
-
 }

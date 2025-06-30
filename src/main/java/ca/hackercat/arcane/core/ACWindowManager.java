@@ -80,7 +80,7 @@ public class ACWindowManager {
         GLCapabilities capabilities = GL.createCapabilities();
 
         ACRenderer renderer = new ACRenderer(windowObj);
-        ACInput.init(windowPtr);
+        ACInput.init(windowPtr, windowObj, renderer);
 
         Thread updateThread = ACThreadManager.execute(() -> {
             while (!closeRequested()) {
@@ -95,7 +95,9 @@ public class ACWindowManager {
                 lastUpdateTimestampNanos = System.nanoTime();
 
 
-                long extraTimeNanos = System.nanoTime() - start;
+                long durationNoPadding = System.nanoTime() - start;
+
+                long extraTimeNanos = targetTimeNanos - durationNoPadding;
 
                 try {
                     ACThreadManager.sleepNanos(extraTimeNanos);
@@ -146,4 +148,7 @@ public class ACWindowManager {
         return 0;
     }
 
+    public void setTargetTPS(double targetTPS) {
+        this.targetTPS = targetTPS;
+    }
 }

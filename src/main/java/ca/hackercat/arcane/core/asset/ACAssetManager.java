@@ -40,7 +40,7 @@ public class ACAssetManager {
                 if (asset.isDisposable()) {
                     garbage.add(asset);
                     asset.dispose();
-                    ACLogger.log(ACLevel.DEBUG, "Cleaned asset %s", asset.getClass().getTypeName() + asset.toString());
+                    ACLogger.log(ACLevel.VERBOSE, "Cleaned asset %s", asset.getClass().getSimpleName());
                 }
             }
             assets.removeAll(garbage);
@@ -52,6 +52,7 @@ public class ACAssetManager {
         synchronized (assets) {
             for (ACAsset asset : assets) {
                 asset.dispose();
+                ACLogger.log(ACLevel.VERBOSE, "Forcibly cleaned asset %s", asset.getClass().getSimpleName());
             }
             assets.clear();
         }

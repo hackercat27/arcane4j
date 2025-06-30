@@ -9,7 +9,7 @@ import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryUtil;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.stb.STBImage.*;
 
 public class ACTexture implements ACAsset {
@@ -43,7 +43,7 @@ public class ACTexture implements ACAsset {
 
     @Override
     public boolean registered() {
-        return id > 0;
+        return id >= 0;
     }
 
     @Override
@@ -51,6 +51,7 @@ public class ACTexture implements ACAsset {
 
         if (textureStream == null) {
             id = glGenTextures();
+            glBindTexture(GL_TEXTURE_2D, id);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -66,7 +67,7 @@ public class ACTexture implements ACAsset {
             buffer.put(data).flip();
         }
         catch (IOException | NullPointerException e) {
-            ACLogger.log(ACLevel.WARN, "Could not load texture.");
+            ACLogger.log(ACLevel.WARN, "Could not load texture: %s", ACLogger.exceptionString(e));
         }
 
         if (buffer == null) {
@@ -92,6 +93,7 @@ public class ACTexture implements ACAsset {
             // something something mipmap levels go here
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width.get(0), height.get(0), 0,
                          GL_RGBA, GL_UNSIGNED_BYTE, image);
+            glGenerateMipmap(GL_TEXTURE_2D);
             stbi_image_free(image);
 
             this.width = width.get(0);
@@ -99,7 +101,6 @@ public class ACTexture implements ACAsset {
 
             ACLogger.log(ACLevel.INFO, "Registered texture with id %d of size %dx%d", getID(), getWidth(), getHeight());
         }
-
     }
 
     @Override
@@ -129,13 +130,13 @@ public class ACTexture implements ACAsset {
     public void setUpscaleFilter(int filter) {
         glBindTexture(GL_TEXTURE_2D, getID());
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-//        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     public void setDownscaleFilter(int filter) {
         glBindTexture(GL_TEXTURE_2D, getID());
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-//        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     public int getID() {
