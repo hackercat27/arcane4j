@@ -1,6 +1,8 @@
 package ca.hackercat.arcane.util;
 
-public class ACTimer implements ACUpdatable {
+import ca.hackercat.arcane.core.ACRenderer;
+
+public class ACTimer implements ACCoroutine {
 
     private double seconds;
     private double activationThreshold;
@@ -23,7 +25,10 @@ public class ACTimer implements ACUpdatable {
     public void update(double deltaTime) {
         seconds += deltaTime;
     }
-    
+
+    @Override
+    public void render(ACRenderer r, double t) {}
+
     public void reset() {
         this.seconds = 0;
     }
