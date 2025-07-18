@@ -3,6 +3,7 @@ package ca.hackercat.arcane.core.io;
 import ca.hackercat.arcane.core.ACThreadManager;
 import ca.hackercat.arcane.core.asset.ACAsset;
 import ca.hackercat.arcane.core.asset.ACAssetManager;
+import java.util.function.Consumer;
 import org.lwjgl.glfw.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -14,6 +15,7 @@ public class ACWindow implements ACAsset {
     private int width;
     private int height;
     private boolean registered;
+    private Consumer<Long> onClose;
 
     public GLFWWindowSizeCallback sizeCallback = new GLFWWindowSizeCallback() {
         @Override
@@ -25,11 +27,21 @@ public class ACWindow implements ACAsset {
         }
     };
 
-    public ACWindow(long window, int width, int height) {
+    public GLFWWindowCloseCallback closeCallback = new GLFWWindowCloseCallback() {
+        @Override
+        public void invoke(long window) {
+            if (onClose != null) {
+                onClose.accept(window);
+            }
+        }
+    };
+
+    public ACWindow(long window, int width, int height, Consumer<Long> onClose) {
         ACThreadManager.throwIfNotMainThread();
         this.window = window;
         this.width = width;
         this.height = height;
+        this.onClose = onClose;
         ACAssetManager.register(this);
     }
 
@@ -49,6 +61,7 @@ public class ACWindow implements ACAsset {
     @Override
     public void register() {
         glfwSetWindowSizeCallback(window, sizeCallback);
+        glfwSetWindowCloseCallback(window, closeCallback);
         registered = true;
     }
 
@@ -60,6 +73,7 @@ public class ACWindow implements ACAsset {
     @Override
     public void dispose() {
         sizeCallback.free();
+        closeCallback.free();
         registered = false;
     }
 }

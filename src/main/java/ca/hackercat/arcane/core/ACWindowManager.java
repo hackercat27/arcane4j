@@ -6,8 +6,6 @@ import ca.hackercat.arcane.core.io.ACWindow;
 import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACGenericManager;
-import java.nio.IntBuffer;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
@@ -63,6 +61,7 @@ public class ACWindowManager {
         glfwWindowHint(GLFW_DEPTH_BITS, 24);
         glfwWindowHint(GLFW_STENCIL_BITS, 8);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         windowPtr = glfwCreateWindow(initialWidth, initialHeight, "Arcane", 0, 0);
 
@@ -71,7 +70,16 @@ public class ACWindowManager {
             return -1;
         }
 
-        ACWindow windowObj = new ACWindow(windowPtr, initialWidth, initialHeight);
+        ACWindow windowObj = new ACWindow(windowPtr, initialWidth, initialHeight, this::close);
+
+        // this mostly just exists so it doesnt throw an error when pressing the stop button
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            closeRequested = true;
+            try {
+                ACThreadManager.sleep(0.5);
+            }
+            catch (InterruptedException ignored) {}
+        }));
 
         glfwMakeContextCurrent(windowPtr);
         glfwSwapInterval(1);
@@ -108,12 +116,18 @@ public class ACWindowManager {
             ACLogger.log(ACLevel.INFO, "Update thread exited");
         }, "arcane-update");
 
+        glEnable(GL_MULTISAMPLE);
         glEnable(GL_DEPTH_TEST);
+
+        int samples = glGetInteger(GL_SAMPLES);
+        System.out.println("Actual samples: " + samples);
 
         while (!closeRequested) {
             long frameStartNanos = System.nanoTime();
             glfwPollEvents();
-            closeRequested = glfwWindowShouldClose(windowPtr);
+            if (glfwWindowShouldClose(windowPtr)) {
+                closeRequested = true;
+            }
 
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -146,6 +160,10 @@ public class ACWindowManager {
         ACLogger.log(ACLevel.VERBOSE, "Released system resources");
 
         return 0;
+    }
+
+    private void close(long window) {
+        closeRequested = true;
     }
 
     public void setTargetTPS(double targetTPS) {
