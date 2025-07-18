@@ -199,7 +199,8 @@ public class ACFileUtils {
             }
         }
 
-        throw new RuntimeException(new FileNotFoundException("Couldn't find asset '" + name + "'!"));
+        ACLogger.log(ACLevel.ERROR, "Couldn't find asset '" + name + "'!");
+        return null;
     }
 
     public static void registerIndex(String path) {

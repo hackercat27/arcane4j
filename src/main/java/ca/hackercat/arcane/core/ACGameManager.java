@@ -9,10 +9,11 @@ public interface ACGameManager {
 
     void render(ACRenderer r, double t);
 
+    ACEntity[] getEntities();
+
     ACEntity[] getEntitiesWithComponent(Class<? extends ACComponent> componentType);
 
     default double getTime() {
         return System.currentTimeMillis() / 1000d;
     }
-
 }

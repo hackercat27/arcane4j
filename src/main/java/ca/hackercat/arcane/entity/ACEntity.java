@@ -2,17 +2,17 @@ package ca.hackercat.arcane.entity;
 
 import ca.hackercat.arcane.core.ACGameManager;
 import ca.hackercat.arcane.core.ACRenderer;
-import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.entity.component.ACActorPhysicsComponent;
+import ca.hackercat.arcane.entity.component.ACComponent;
 import ca.hackercat.arcane.logging.ACLevel;
 import ca.hackercat.arcane.logging.ACLogger;
 import ca.hackercat.arcane.util.ACMath;
-import org.joml.Vector2d;
-
+import ca.hackercat.arcane.util.ACCoroutine;
 import java.util.ArrayList;
 import java.util.List;
+import org.joml.Vector2d;
 
-public class ACEntity {
+public class ACEntity implements ACCoroutine {
 
     private static Vector2d gravity = new Vector2d(0, -72);
 
@@ -68,6 +68,7 @@ public class ACEntity {
         return null;
     }
 
+    @Override
     public void update(double deltaTime) {
         lastRotation = rotation;
         lastPosition.set(position);
@@ -87,6 +88,7 @@ public class ACEntity {
         }
     }
 
+    @Override
     public void render(ACRenderer renderer, double interp) {
         synchronized (components) {
             for (ACComponent component : components) {

@@ -16,7 +16,6 @@ import org.joml.Quaterniond;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 import org.joml.Vector4d;
-import org.joml.primitives.Rectangled;
 
 import java.awt.Color;
 import java.util.LinkedList;
@@ -38,6 +37,7 @@ public class ACRenderer {
     private Vector2d translation = new Vector2d();
     private double rotation;
 
+    private ACShader customShader;
     private final Map<String, ACShader> shaders = new HashMap<>();
 
     private Vector4d color = new Vector4d(1, 1, 1, 1);
@@ -78,7 +78,6 @@ public class ACRenderer {
             };
 
             for (String shader : shadersToLoad) {
-
                 shaders.put(shader, (ACShader) ACFileUtils.getAsset(shader));
             }
         });
@@ -99,24 +98,28 @@ public class ACRenderer {
                 switch (request.type) {
                     case RECT -> handleDrawRect(request.projection == null? getProjection() : request.projection,
                                                 request.camera == null? getTransform() : request.camera,
-                                                request.position, request.size, request.rotation,
+                                                request.transform,
                                                 request.color, request.fill, 0,
-                                                getShader("arcane.shader.colorable"));
+                                                request.customShader == null? getShader("arcane.shader.colorable") : request.customShader);
                     case OVAL -> handleDrawRect(request.projection == null? getProjection() : request.projection,
                                                 request.camera == null? getTransform() : request.camera,
-                                                request.position, request.size, request.rotation,
+                                                request.transform,
                                                 request.color, request.fill, 1,
-                                                getShader("arcane.shader.colorable"));
+                                                request.customShader == null? getShader("arcane.shader.colorable") : request.customShader);
                     case TEXTURE -> handleDrawTextureRect(request.projection == null? getProjection() : request.projection,
                                                           request.camera == null? getTransform() : request.camera,
-                                                          request.position, request.size, request.rotation,
+                                                          request.transform,
                                                           request.texture,
-                                                          getShader("arcane.shader.texture_cutout"));
+                                                          request.customShader == null? getShader("arcane.shader.texture_cutout") : request.customShader);
                 }
             }
             drawQueue.clear();
 
         }
+    }
+
+    public void setShader(ACShader shader) {
+        this.customShader = shader;
     }
 
     public void setColor(double r, double g, double b) {
@@ -210,97 +213,41 @@ public class ACRenderer {
         screenspace.y -= translation.y;
 
         return screenspace;
-
     }
 
-    public void drawRect(double posX, double posY, double sizeX, double sizeY, double rotation) {
-        drawRect(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY), rotation);
-    }
-
-    public void drawRect(Vector2d position, Vector2d size, double rotation) {
-        drawRect(position, size, 0, rotation);
-    }
-
-    public void drawRect(Rectangled rect, double rotation) {
-        drawRect(rect, 0, rotation);
-    }
-
-    public void drawRect(Rectangled rect, double depth, double rotation) {
-        drawRect(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth, rotation);
-    }
-
-    public void drawRect(Vector2d position, Vector2d size, double depth, double rotation) {
-        drawRect(new Vector3d(position, depth), size, rotation);
-    }
-
-    public void drawRect(Vector3d position, Vector2d size, double rotation) {
+    public void drawRect(Matrix4d transform) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.RECT);
-        request.position = new Vector3d().set(position);
-        request.size = new Vector2d().set(size);
+        request.transform = new Matrix4d().set(transform);
         request.color = new Vector4d().set(this.color);
-        request.rotation = rotation;
         request.camera = new Matrix4d().set(getTransform());
+        request.customShader = customShader;
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
-    public void drawOval(double posX, double posY, double sizeX, double sizeY, double rotation) {
-        drawOval(posX, posY, sizeX, sizeY, 0, rotation);
-    }
-
-    public void drawOval(double posX, double posY, double sizeX, double sizeY, double depth, double rotation) {
-        drawOval(new Vector2d(posX, posY), new Vector2d(sizeX, sizeY), depth, rotation);
-    }
-
-    public void drawOval(Vector2d position, Vector2d size, double rotation) {
-        drawOval(position, size, 0, rotation);
-    }
-
-    public void drawOval(Rectangled rect, double rotation) {
-        drawOval(rect, 0, rotation);
-    }
-
-    public void drawOval(Rectangled rect, double depth, double rotation) {
-        drawOval(new Vector2d(rect.minX, rect.minY), rect.lengths(new Vector2d()), depth, rotation);
-    }
-
-    public void drawOval(Vector2d position, Vector2d size, double depth, double rotation) {
-        drawOval(new Vector3d(position, depth), size, rotation);
-    }
-
-    public void drawOval(Vector3d position, Vector2d size, double rotation) {
+    public void drawOval(Matrix4d transform) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.OVAL);
-        request.position = new Vector3d().set(position);
-        request.size = new Vector2d().set(size);
+        request.transform = new Matrix4d().set(transform);
         request.color = new Vector4d().set(this.color);
-        request.rotation = rotation;
+        request.customShader = customShader;
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
-    public void drawTexture(ACTexture texture, Vector2d position, Vector2d size) {
-        drawTexture(texture, new Vector3d(position, 0), size);
-    }
-
-    public void drawTexture(ACTexture texture, Vector2d position, Vector2d size, double depth) {
-        drawTexture(texture, new Vector3d(position, depth), size);
-    }
-
-    public void drawTexture(ACTexture texture, Vector3d position, Vector2d size) {
+    public void drawTexture(ACTexture texture, Matrix4d transform) {
         ACDrawRequest request = new ACDrawRequest(ACDrawRequest.Type.TEXTURE);
-        request.position = new Vector3d().set(position);
-        request.size = new Vector2d().set(size);
+        request.transform = new Matrix4d().set(transform);
         request.texture = texture;
-        request.rotation = rotation;
+        request.customShader = customShader;
         synchronized (drawQueue) {
             drawQueue.add(request);
         }
     }
 
     private void handleDrawRect(Matrix4d projection, Matrix4d camera,
-                                Vector3d position, Vector2d size, double rotation,
+                                Matrix4d transform,
                                 Vector4d color, boolean fill, double cornerRadius, ACShader shader) {
 
         if (quad == null || !quad.registered()
@@ -310,8 +257,6 @@ public class ACRenderer {
         }
 
         ACThreadManager.throwIfNotMainThread();
-
-        Matrix4d transform = ACMath.getOBJTransform(position, size, rotation);
 
         glBindVertexArray(quad.vao);
 
@@ -341,13 +286,13 @@ public class ACRenderer {
         glUseProgram(0);
 
         int err = glGetError();
-        if (err != 0) {
-            ACLogger.log(ACLevel.ERROR, err);
+        if (err != GL_NO_ERROR) {
+            ACLogger.log(ACLevel.ERROR, "OpenGL error %d", err);
         }
     }
 
     private void handleDrawTextureRect(Matrix4d projection, Matrix4d camera,
-                                       Vector3d position, Vector2d size, double rotation,
+                                       Matrix4d transform,
                                        ACTexture texture, ACShader shader) {
 
         if (quad == null || !quad.registered()
@@ -360,8 +305,6 @@ public class ACRenderer {
         texture.setFilter(GL_NEAREST);
 
         ACThreadManager.throwIfNotMainThread();
-
-        Matrix4d transform = ACMath.getOBJTransform(position, size, rotation);
 
         glBindVertexArray(quad.vao);
 
@@ -381,7 +324,7 @@ public class ACRenderer {
         shader.setUniform("projection", projection);
         shader.setUniform("camera", camera);
 
-        shader.setUniform("sampler", 0);
+        shader.setUniform("diffuseMap", 0);
 
         glDrawElements(GL_TRIANGLES, quad.indices.length, GL_UNSIGNED_INT, 0);
 
@@ -396,8 +339,8 @@ public class ACRenderer {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         int err = glGetError();
-        if (err != 0) {
-            ACLogger.log(ACLevel.ERROR, err);
+        if (err != GL_NO_ERROR) {
+            ACLogger.log(ACLevel.ERROR, "OpenGL error %d", err);
         }
 
     }
